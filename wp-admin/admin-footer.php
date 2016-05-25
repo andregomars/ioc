@@ -27,7 +27,10 @@ if ( !defined('ABSPATH') )
 	<p id="footer-left" class="alignleft">
 		<?php
 		// PN: Mod Start
-		$text = sprintf( __( 'Thank you for creating with <a href="%s">Project Nami</a>.' ), __( 'http://projectnami.org/' ) );
+		//by andre
+		//$text = sprintf( __( 'Thank you for creating with <a href="%s">Project Nami</a>.' ), __( 'http://projectnami.org/' ) );
+		$text = '';
+		//by andre end
 		// PN: Mod End
 		/**
 		 * Filter the "Thank you" text displayed in the admin footer.
