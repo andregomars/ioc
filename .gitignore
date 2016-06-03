@@ -2,3 +2,4 @@ wp-config.php
 info.php
 wp-content/uploads/bb-plugin/cache
 wp-content/debug.log
+web.config
