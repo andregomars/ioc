@@ -2704,7 +2704,10 @@ final class FLBuilderModel {
 
 			foreach($post_meta as $meta_info) {
 				$meta_key	  = $meta_info->meta_key;
-				$meta_value	  = addslashes($meta_info->meta_value);
+				//$meta_value	  = addslashes($meta_info->meta_value);
+				//by andre
+				$meta_value	  = $meta_info->meta_value;
+				//by andre end
 				$sql_select[] = "SELECT {$new_post_id}, '{$meta_key}', '{$meta_value}'";
 			}
 

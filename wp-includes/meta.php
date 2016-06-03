@@ -77,7 +77,13 @@ function add_metadata($meta_type, $object_id, $meta_key, $meta_value, $unique = 
 		return false;
 
 	$_meta_value = $meta_value;
-	$meta_value = maybe_serialize( $meta_value );
+	//$meta_value = maybe_serialize( $meta_value );
+	//by andre
+	if ($meta_key == '_fl_builder_data' || $meta_key == '_fl_builder_draft' )
+		$meta_value = base64_encode( maybe_serialize( $meta_value ));
+	else
+		$meta_value = maybe_serialize( $meta_value );
+	//by andre end
 
 	/**
 	 * Fires immediately before meta of a specific type is added.
@@ -203,7 +209,13 @@ function update_metadata($meta_type, $object_id, $meta_key, $meta_value, $prev_v
 	}
 
 	$_meta_value = $meta_value;
-	$meta_value = maybe_serialize( $meta_value );
+	//$meta_value = maybe_serialize( $meta_value );
+	//by andre
+	if ($raw_meta_key == '_fl_builder_data' || $raw_meta_key == '_fl_builder_draft') 
+		$meta_value = base64_encode(maybe_serialize($meta_value));
+	else
+		$meta_value = maybe_serialize( $meta_value );
+	//by andre end
 
 	$data  = compact( 'meta_value' );
 	$where = array( $column => $object_id, 'meta_key' => $meta_key );
@@ -829,7 +841,13 @@ function update_meta_cache($meta_type, $object_ids) {
 		foreach ( $meta_list as $metarow) {
 			$mpid = intval($metarow[$column]);
 			$mkey = $metarow['meta_key'];
-			$mval = $metarow['meta_value'];
+			//$mval = $metarow['meta_value'];
+			//by andre			
+			if ($mkey == '_fl_builder_data' || $mkey == '_fl_builder_draft') 
+				$mval = base64_decode($metarow['meta_value']);
+			else 
+				$mval = $metarow['meta_value'];
+			//by andre end
 
 			// Force subkeys to be array type:
 			if ( !isset($cache[$mpid]) || !is_array($cache[$mpid]) )
