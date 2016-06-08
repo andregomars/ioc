@@ -42,7 +42,12 @@ class PLL_MO extends MO {
 		$post['post_title'] = 'polylang_mo_' . $lang->term_id;
 		// json_encode would take less space but is slower to decode
 		// wp_insert_post expects slashed data
-		$post['post_content'] = addslashes( serialize( $strings ) );
+
+		//by andre
+		//$post['post_content'] = addslashes( serialize( $strings ) );
+		$post['post_content'] = base64_encode( serialize( $strings ) );
+		//by andre end
+
 		$post['post_status'] = 'private'; // to avoid a conflict with WP Super Cache. See https://wordpress.org/support/topic/polylang_mo-and-404s-take-2
 		$post['post_type'] = 'polylang_mo';
 		wp_insert_post( $post );
@@ -58,7 +63,12 @@ class PLL_MO extends MO {
 	public function import_from_db( $lang ) {
 		if ( ! empty( $lang->mo_id ) ) {
 			$post = get_post( $lang->mo_id, OBJECT );
-			$strings = unserialize( $post->post_content );
+			
+			//by andre
+			//$strings = unserialize( $post->post_content );
+			$strings = unserialize( base64_decode($post->post_content) );
+			//by andre end
+
 			if ( is_array( $strings ) ) {
 				foreach ( $strings as $msg ) {
 					$this->add_entry( $this->make_entry( $msg[0], $msg[1] ) );
