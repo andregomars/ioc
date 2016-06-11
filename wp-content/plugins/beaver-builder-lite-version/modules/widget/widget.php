@@ -13,7 +13,7 @@ class FLWidgetModule extends FLBuilderModule {
         parent::__construct(array(
             'name'          	=> __('Widget', 'fl-builder'),
             'description'   	=> __('Display a WordPress widget.', 'fl-builder'),
-            'category'   		=> __('WordPress Widgets', 'fl-builder'),
+            'category'   		=> __('Basic Widgets', 'fl-builder'),
             'editor_export' 	=> false,
 			'partial_refresh'	=> true
         ));
