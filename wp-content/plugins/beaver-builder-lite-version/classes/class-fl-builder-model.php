@@ -1906,7 +1906,7 @@ final class FLBuilderModel {
 		$basic_key		 = __('Basic Modules', 'fl-builder');
 		$advanced_key	 = __('Advanced Modules', 'fl-builder');
 		$other_key		 = __('Other Modules', 'fl-builder');
-		$widgets_key	 = __('WordPress Widgets', 'fl-builder');
+		$widgets_key	 = __('Basic Widgets', 'fl-builder');
 
 		// Build the default category arrays. 
 		$categories[ $basic_key ] = array();
@@ -1970,7 +1970,7 @@ final class FLBuilderModel {
 		$basic_key		 = __('Basic Modules', 'fl-builder');
 		$advanced_key	 = __('Advanced Modules', 'fl-builder');
 		$other_key		 = __('Other Modules', 'fl-builder');
-		$widgets_key	 = __('WordPress Widgets', 'fl-builder');
+		$widgets_key	 = __('Basic Widgets', 'fl-builder');
 		
 		if ( $name == $basic_key ) {
 			return 'basic';

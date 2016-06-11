@@ -29,7 +29,7 @@
 			<h3><?php echo $title; ?></h3>
 				<?php
 					
-				if ( $title == __( 'WordPress Widgets', 'fl-builder') ) : 
+				if ( $title == __( 'Basic Widgets', 'fl-builder') ) : 
 					
 					$checked = in_array('widget', $enabled_modules) ? 'checked' : '';
 					

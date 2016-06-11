@@ -53,7 +53,7 @@
 						<?php echo $title; ?>
 						<i class="fa fa-chevron-down"></i>
 					</span>
-					<?php if($title == __('WordPress Widgets', 'fl-builder')) : ?>
+					<?php if($title == __('Basic Widgets', 'fl-builder')) : ?>
 					<div class="fl-builder-blocks-section-content fl-builder-widgets">
 						<?php foreach($modules as $module) : ?>
 						<span class="fl-builder-block fl-builder-block-module" data-type="widget" data-widget="<?php echo $module->class; ?>"><span class="fl-builder-block-title"><?php echo $module->name; ?></span></span>
