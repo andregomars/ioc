@@ -98,6 +98,28 @@ function sydney_widgets_init() {
 		'after_title'   => '</h3>',
 	) );
 
+	//by andre
+	register_sidebar( array(
+		'name'          => __( 'Sidebar_es', 'sydney' ),
+		'id'            => 'sidebar-es',
+		'description'   => '',
+		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</aside>',
+		'before_title'  => '<h3 class="widget-title">',
+		'after_title'   => '</h3>',
+	) );
+
+	register_sidebar( array(
+		'name'          => __( 'Sidebar_cn', 'sydney' ),
+		'id'            => 'sidebar-cn',
+		'description'   => '',
+		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</aside>',
+		'before_title'  => '<h3 class="widget-title">',
+		'after_title'   => '</h3>',
+	) );
+	//by andre end
+
 	//Footer widget areas
 	$widget_areas = get_theme_mod('footer_widget_areas', '3');
 	for ($i=1; $i<=$widget_areas; $i++) {
@@ -328,6 +350,9 @@ function sydney_recommend_plugin() {
 }
 
 //by andre
+/**
+ * remove wp logo, updates, comments from admin bar in the top
+ */
 function remove_admin_bar_links() {
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');          // Remove the WordPress logo
@@ -345,6 +370,7 @@ function remove_admin_bar_links() {
     // $wp_admin_bar->remove_menu('my-account');       // Remove the user details tab
 }
 add_action( 'wp_before_admin_bar_render', 'remove_admin_bar_links' );
+
 
 
 function custom_login_logo() {
