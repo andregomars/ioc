@@ -163,7 +163,6 @@ class WP_User {
 	public function init( $data, $blog_id = '' ) {
 		$this->data = $data;
 		$this->ID = (int) $data->ID;
-
 		$this->for_blog( $blog_id );
 	}
 
@@ -215,12 +214,14 @@ class WP_User {
 				break;
 			case 'email':
 				$user_id = wp_cache_get($value, 'useremail');
-				$db_field = 'user_email';
+				//$db_field = 'user_email';  
+				$db_field = 'Email';  //by andre
 				break;
 			case 'login':
 				$value = sanitize_user( $value );
 				$user_id = wp_cache_get($value, 'userlogins');
-				$db_field = 'user_login';
+				//$db_field = 'user_login';
+				$db_field = 'LoginName';  //by andre
 				break;
 			default:
 				return false;
@@ -231,10 +232,29 @@ class WP_User {
 				return $user;
 		}
 
+//by andre
+		// if ( !$user = $wpdb->get_row( $wpdb->prepare(
+		// 	"SELECT * FROM $wpdb->users WHERE $db_field = %s", $value
+		// ) ) )
+		// 	return false;
 		if ( !$user = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM $wpdb->users WHERE $db_field = %s", $value
+			"SELECT ID
+		      ,LoginName as user_login
+			  ,Password as user_pass
+		      ,Name as user_nicename
+			  ,Email as user_email
+		      ,'' as user_url
+		      ,InDate as user_registered
+		      ,'' as user_activation_key
+		      ,0 as user_status
+		      ,Name as display_name
+		      ,0 as spam
+			  ,0 as deleted
+	  		FROM Core.dbo.Core_User WHERE $db_field = %s", $value
 		) ) )
 			return false;
+error_log('user in WP-User=>get_data_by: '. print_r($user,1));
+//by andre end
 
 		update_user_caches( $user );
 
