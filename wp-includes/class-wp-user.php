@@ -253,7 +253,7 @@ class WP_User {
 	  		FROM Core.dbo.Core_User WHERE $db_field = %s", $value
 		) ) )
 			return false;
-error_log('user in WP-User=>get_data_by: '. print_r($user,1));
+//error_log('user in WP-User=>get_data_by: '. print_r($user,1));
 //by andre end
 
 		update_user_caches( $user );
