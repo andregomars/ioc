@@ -365,6 +365,19 @@ function require_wp_db() {
 	$wpdb = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
 }
 
+//by andre
+function require_wp_api() {
+	global $wpapi;
+
+	require_once( ABSPATH . WPINC . '/wp-api.php' );
+
+	if ( isset( $wpapi ) )
+		return;
+
+	$wpapi = new wpapi();
+}
+//by andre end
+
 /**
  * Set the database table prefix and the format specifiers for database
  * table columns.

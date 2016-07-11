@@ -455,7 +455,9 @@ $query_var = "ext_auth";
 $auth_url = "http://localhost:52432/api/IOCUser";
 
 // Setup the external auth
-add_filter( 'authenticate', 'extwpauth_authenticate', 10, 3 );
+//add_filter( 'authenticate', 'extwpauth_authenticate', 10, 3 );
+add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
+
 function extwpauth_authenticate( $user, $username, $password) {
 	error_log('call extwpauth_authenticate');
 
@@ -519,9 +521,72 @@ function extwpauth_authenticate( $user, $username, $password) {
      //remove_action('authenticate', 'wp_authenticate_username_password', 20);
  
  //by andre
- //error_log('user: '.print_r($user, 1));
+ error_log('user: '.print_r($user, 1));
 
      return $user;
+}
+
+function wpapi_auth( $user, $username, $password) {
+//error_log('wpapi_auth');
+	if ( $user instanceof WP_User ) {
+		return $user;
+	}
+
+	if ( empty($username) || empty($password) ) {
+		if ( is_wp_error( $user ) )
+			return $user;
+
+		$error = new WP_Error();
+
+		if ( empty($username) )
+			$error->add('empty_username', __('<strong>ERROR</strong>: The username field is empty.'));
+
+		if ( empty($password) )
+			$error->add('empty_password', __('<strong>ERROR</strong>: The password field is empty.'));
+
+		return $error;
+	}
+	
+	//comment next 4 lines once wapi doesn't work, fall back to wp native auth methods
+	// remove_action('authenticate', 'wp_authenticate_username_password', 20);
+	// remove_action('authenticate', 'wp_authenticate_email_password', 20);
+	// remove_action('authenticate', 'wp_authenticate_spam_check', 99);
+	// remove_action('authenticate', 'wp_authenticate_cookie', 30);
+
+    global $wpapi;
+    $user = $wpapi->get_wpuser($username);
+
+	if ( !$user ) {
+		return new WP_Error( 'invalid_username',
+			__( '<strong>ERROR</strong>: Invalid username.' ) .
+			' <a href="' . wp_lostpassword_url() . '">' .
+			__( 'Lost your password?' ) .
+			'</a>'
+		);
+	}
+
+	if ( is_wp_error( $user ) ) {
+		return $user;
+	}
+
+// error_log('password: '.$password);
+// error_log('user_pass: '.$user->user_pass);
+// error_log('user: '.print_r($user,1));
+
+	if ( ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
+		return new WP_Error( 'incorrect_password',
+			sprintf(
+				/* translators: %s: user name */
+				__( '<strong>ERROR</strong>: The password you entered for the username %s is incorrect.' ),
+				'<strong>' . $username . '</strong>'
+			) .
+			' <a href="' . wp_lostpassword_url() . '">' .
+			__( 'Lost your password?' ) .
+			'</a>'
+		);
+	}
+
+	return $user;
 }
 
 //by andre end

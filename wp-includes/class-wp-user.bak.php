@@ -116,7 +116,18 @@ class WP_User {
 	 * @param int $blog_id Optional Site ID, defaults to current site.
 	 */
 	public function __construct( $id = 0, $name = '', $blog_id = '' ) {
-		
+		if ( ! isset( self::$back_compat_keys ) ) {
+			$prefix = $GLOBALS['wpdb']->prefix;
+			self::$back_compat_keys = array(
+				'user_firstname' => 'first_name',
+				'user_lastname' => 'last_name',
+				'user_description' => 'description',
+				'user_level' => $prefix . 'user_level',
+				$prefix . 'usersettings' => $prefix . 'user-settings',
+				$prefix . 'usersettingstime' => $prefix . 'user-settings-time',
+			);
+		}
+
 		if ( $id instanceof WP_User ) {
 			$this->init( $id->data, $blog_id );
 			return;
@@ -152,6 +163,7 @@ class WP_User {
 	public function init( $data, $blog_id = '' ) {
 		$this->data = $data;
 		$this->ID = (int) $data->ID;
+
 		$this->for_blog( $blog_id );
 	}
 
@@ -170,7 +182,7 @@ class WP_User {
 	 * @return object|false Raw user object
 	 */
 	public static function get_data_by( $field, $value ) {
-		global $wpapi;
+		global $wpdb;
 
 		// 'ID' is an alias of 'id'.
 		if ( 'ID' === $field ) {
@@ -203,7 +215,7 @@ class WP_User {
 				break;
 			case 'email':
 				$user_id = wp_cache_get($value, 'useremail');
-				$db_field = 'user_email';  
+				$db_field = 'user_email';
 				break;
 			case 'login':
 				$value = sanitize_user( $value );
@@ -213,15 +225,15 @@ class WP_User {
 			default:
 				return false;
 		}
-// error_log('field in wp_user: '.print_r($field,1));
-// error_log('value in wp_user: '.print_r($value,1));
-// error_log('user_id in wp_user: '.print_r($user_id,1));
+
 		if ( false !== $user_id ) {
 			if ( $user = wp_cache_get( $user_id, 'users' ) )
 				return $user;
 		}
 
-		if ( !$user = $wpapi -> get_user($db_field, $value) )
+		if ( !$user = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM $wpdb->users WHERE $db_field = %s", $value
+		) ) )
 			return false;
 
 		update_user_caches( $user );
@@ -256,8 +268,6 @@ class WP_User {
 	 * @return bool Whether the given user meta key is set.
 	 */
 	public function __isset( $key ) {
-		global $wpapi;
-		
 		if ( 'id' == $key ) {
 			_deprecated_argument( 'WP_User->id', '2.1',
 				sprintf(
@@ -275,10 +285,7 @@ class WP_User {
 		if ( isset( self::$back_compat_keys[ $key ] ) )
 			$key = self::$back_compat_keys[ $key ];
 
-		if ( !$user = $wpapi -> get_user($key, $this->ID) )
-			return false;
-
-		return true;
+		return metadata_exists( 'user', $this->ID, $key );
 	}
 
 	/**
@@ -313,12 +320,6 @@ class WP_User {
 		if ( $this->filter ) {
 			$value = sanitize_user_field( $key, $value, $this->ID, $this->filter );
 		}
-
-//by andre
-// error_log('ID: '. print_r($this->ID,1));
-// error_log('key: '. print_r($key,1));
-// error_log('value: '. print_r($value,1));
-//by andre end
 
 		return $value;
 	}
