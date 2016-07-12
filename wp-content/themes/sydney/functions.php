@@ -456,8 +456,6 @@ $auth_url = "http://localhost:52432/api/IOCUser";
 
 // Setup the external auth
 //add_filter( 'authenticate', 'extwpauth_authenticate', 10, 3 );
-add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
-
 function extwpauth_authenticate( $user, $username, $password) {
 	error_log('call extwpauth_authenticate');
 
@@ -519,13 +517,11 @@ function extwpauth_authenticate( $user, $username, $password) {
      // Comment this line if you wish to fall back on WordPress authentication
      // Useful for times when the external service is offline
      //remove_action('authenticate', 'wp_authenticate_username_password', 20);
- 
- //by andre
- error_log('user: '.print_r($user, 1));
 
      return $user;
 }
 
+add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
 function wpapi_auth( $user, $username, $password) {
 //error_log('wpapi_auth');
 	if ( $user instanceof WP_User ) {
@@ -588,5 +584,7 @@ function wpapi_auth( $user, $username, $password) {
 
 	return $user;
 }
+
+
 
 //by andre end
