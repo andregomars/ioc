@@ -1368,7 +1368,7 @@ function validate_username( $username ) {
  *                      be created.
  */
 function wp_insert_user( $userdata ) {
-	global $wpdb;
+	global $wpapi, $wpdb;
 
 	if ( $userdata instanceof stdClass ) {
 		$userdata = get_object_vars( $userdata );
@@ -1599,8 +1599,9 @@ function wp_insert_user( $userdata ) {
 		$wpdb->update( $wpdb->users, $data, compact( 'ID' ) );
 		$user_id = (int) $ID;
 	} else {
-		$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
-		$user_id = (int) $wpdb->insert_id;
+		//$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
+		//$user_id = (int) $wpdb->insert_id;
+		$user_id = $wpapi->insert_user($data + compact( 'user_login' ));
 	}
 
 	$user = new WP_User( $user_id );
@@ -1634,7 +1635,8 @@ function wp_insert_user( $userdata ) {
 
 	// Update user meta.
 	foreach ( $meta as $key => $value ) {
-		update_user_meta( $user_id, $key, $value );
+		//update_user_meta( $user_id, $key, $value );
+		$wpapi->update_user_meta( $user_id, $key, $value );
 	}
 
 	foreach ( wp_get_user_contact_methods( $user ) as $key => $value ) {

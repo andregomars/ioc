@@ -127,6 +127,16 @@ class wpapi {
 		return $wpuser;
 	}
 
+	public static function insert_user($data) {
+		error_log('insert user from wpapi is: '.print_r($data,1));
+		return 22;
+	}
+
+	public static function update_user_meta($user_id, $key, $value) {
+		error_log('update user meta from wpapi, user_id:'.$user_id.', '.$key.':'.$value);
+	}
+
+
 	//duplicate from wpdb
 	public function show_errors( $show = true ) {
 		$errors = $this->show_errors;
