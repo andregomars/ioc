@@ -20,10 +20,10 @@ class wpapi {
 		$data = array(
 		    "ID" => 5
 		    ,"user_login" => "iocdbo"
-		    //,"user_pass" => "\$P\$BNFf4uVZpDCtmlXamTifSG0cX.VGZQ0"
-		    ,"user_pass" => "\$P\$BttNosmG.1S4KlsuiQPDcjCLIAyHWk0"
+		    ,"user_pass" => "8be4177df4ec5dee8c8bc4f3b49d7a2d"
+		    //,"user_pass" => "\$P\$BttNosmG.1S4KlsuiQPDcjCLIAyHWk0"
 		    ,"user_nicename" => "iocdbo"
-		    ,"user_email" => "iocdbo@gmail.com"
+		    ,"user_email" => "andregomars@gmail.com"
 		    ,"user_url" => ""
 		    ,"user_registered" => "2016-06-05 00:16:33"
 		    ,"user_activation_key" => ""
