@@ -109,14 +109,13 @@ class WP_Roles {
 	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	protected function _init() {
-		global $wpdb, $wp_user_roles, $wpapi;
+		global $wpdb, $wp_user_roles;
 		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
 		if ( ! empty( $wp_user_roles ) ) {
 			$this->roles = $wp_user_roles;
 			$this->use_db = false;
 		} else {
-			//$this->roles = get_option( $this->role_key );
-			$this->roles = $wpapi->get_all_roles();
+			$this->roles = get_option( $this->role_key );
 		}
 
 		if ( empty( $this->roles ) )
