@@ -20,7 +20,7 @@ class wpapi {
 		$data = array(
 		    "ID" => 5
 		    ,"user_login" => "iocdbo"
-		    ,"user_pass" => "8be4177df4ec5dee8c8bc4f3b49d7a2d"
+		    ,"user_pass" => "8be4177df4ec5dee8c8bc4f3b49d7a2d"  //1111
 		    //,"user_pass" => "\$P\$BttNosmG.1S4KlsuiQPDcjCLIAyHWk0"
 		    ,"user_nicename" => "iocdbo"
 		    ,"user_email" => "andregomars@gmail.com"
@@ -136,6 +136,10 @@ class wpapi {
 		error_log('update user meta from wpapi, user_id:'.$user_id.', '.$key.':'.$value);
 	}
 
+	public static function delete_user($user_id) {
+		error_log('delete user from wpapi is: '.print_r($user_id,1));
+		
+	}
 
 	//duplicate from wpdb
 	public function show_errors( $show = true ) {

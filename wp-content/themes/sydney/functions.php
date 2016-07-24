@@ -523,7 +523,6 @@ function extwpauth_authenticate( $user, $username, $password) {
 
 add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
 function wpapi_auth( $user, $username, $password) {
-//error_log('wpapi_auth');
 	if ( $user instanceof WP_User ) {
 		return $user;
 	}
