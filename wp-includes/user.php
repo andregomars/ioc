@@ -814,7 +814,7 @@ function update_user_meta($user_id, $meta_key, $meta_value, $prev_value = '') {
  * @return array Includes a grand total and an array of counts indexed by role strings.
  */
 function count_users($strategy = 'time') {
-	global $wpdb;
+	global $wpdb, $wpapi;
 
 	// Initialize
 	$id = get_current_blog_id();
@@ -822,6 +822,7 @@ function count_users($strategy = 'time') {
 	$result = array();
 
 	if ( 'time' == $strategy ) {
+		/* Original:
 		$avail_roles = wp_roles()->get_names();
 
 		// Build a CPU-intensive query that will return concise information.
@@ -852,6 +853,8 @@ function count_users($strategy = 'time') {
 
 		$result['total_users'] = $total_users;
 		$result['avail_roles'] =& $role_counts;
+		*/
+		$result = $wpapi->get_counted_users();
 	} else {
 		$avail_roles = array(
 			'none' => 0,
