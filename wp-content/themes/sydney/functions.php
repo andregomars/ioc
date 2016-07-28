@@ -523,6 +523,8 @@ function extwpauth_authenticate( $user, $username, $password) {
 
 add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
 function wpapi_auth( $user, $username, $password) {
+	global $wpapi;
+
 	if ( $user instanceof WP_User ) {
 		return $user;
 	}
@@ -548,7 +550,6 @@ function wpapi_auth( $user, $username, $password) {
 	// remove_action('authenticate', 'wp_authenticate_spam_check', 99);
 	// remove_action('authenticate', 'wp_authenticate_cookie', 30);
 
-    global $wpapi;
     $user = $wpapi->get_wpuser($username);
 
 	if ( !$user ) {
