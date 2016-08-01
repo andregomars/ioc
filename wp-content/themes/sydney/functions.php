@@ -550,7 +550,7 @@ function wpapi_auth( $user, $username, $password) {
 	// remove_action('authenticate', 'wp_authenticate_spam_check', 99);
 	// remove_action('authenticate', 'wp_authenticate_cookie', 30);
 
-    $user = $wpapi->get_wpuser($username);
+    $user = $wpapi->get_wpuser('user_login', $username);
 
 	if ( !$user ) {
 		return new WP_Error( 'invalid_username',

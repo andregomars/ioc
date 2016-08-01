@@ -41,12 +41,23 @@ class wpapi {
 		return (object)$userJSON;
 	}
 
-	public static function get_wpuser($username) {
+	public static function get_wpuser($field, $value) {
 		$wpuser = new WP_User();
 
 		$wpuserJSON = null;
-		$url = "http://localhost:52432/api/IOCUserInfo?loginName=".$username;
-		$request = wp_remote_get( "$url" );
+		$url = "";
+		switch( $field ) {
+			case "ID":
+				$url = "http://localhost:52432/api/IOCUserInfo/".$value;
+				break;
+			case "user_login":
+				$url = "http://localhost:52432/api/IOCUserInfo?loginName=".$value;
+				break;
+			default:
+				break;
+		}
+
+		$request = wp_remote_get( $url );
 		$response = wp_remote_retrieve_body( $request );
 		if( !$response )
 			return null;
@@ -68,8 +79,112 @@ class wpapi {
 		return 22;
 	}
 
-	public static function update_user_meta($user_id, $key, $value) {
-		error_log('update user meta from wpapi, user_id:'.$user_id.', '.$key.':'.$value);
+	//return: boolean
+	public static function update_user($user_id, $data) {
+		global $current_user;
+
+		if ( $user_id < 1 || !$data )
+			return false;
+
+		$url_user = "http://localhost:52432/api/User/" . $user_id;
+
+		//get user object id from api
+		$request_get_user = wp_remote_get( $url_user );
+		$response_get_user = wp_remote_retrieve_body( $request_get_user );
+		if( !$response_get_user )
+			return false;
+		$user_update = json_decode($response_get_user, true);
+
+		//update user basic info in db by user table id
+		$user_update['Password'] = $data['user_pass'];
+		$user_update['Email'] = $data['user_email'];
+		$user_update['Name'] = $data['display_name'];
+		$user_update['EditDate'] = date('c');
+		$user_update['EditUser'] = $current_user->user_login;
+
+		$options = array(
+			'headers' => array(
+				'Content-Type' => 'text/json'
+			),
+			'body'	=> json_encode($user_update)
+		);
+
+		$response_update_user = wp_remote_put( $url_user, $options );
+		if ( is_wp_error( $response_update_user ) || !$response_update_user ) {
+			return false;
+		} 
+	}
+
+	//return: boolean
+	public static function update_user_caps($user_id, $caps) {
+		global $current_user;
+
+		$url_userRole = "http://localhost:52432/api/UserRole/";
+		$url_role = "http://localhost:52432/api/Role/";
+
+		//get all userRole IDs of the user
+		$request_get_userRole = wp_remote_get( $url_userRole );
+		$response_get_userRole = wp_remote_retrieve_body( $request_get_userRole );
+		if( !$response_get_userRole )
+			return false;
+		$allUserRoles = json_decode($response_get_userRole, true);
+		$userRoleIDs = array();
+		foreach ($allUserRoles as $userRole) {
+			if ($userRole['UserID'] == $user_id) {
+				array_push($userRoleIDs, $userRole['ID']);
+			}
+		}
+
+		if (!$userRoleIDs || count($userRoleIDs) < 1) 
+			return false;
+
+		//get all roles
+		$request_get_userRole = wp_remote_get( $url_role );
+		$response_get_userRole = wp_remote_retrieve_body( $request_get_userRole );
+		if( !$response_get_userRole )
+			return false;
+		$allRoles = json_decode($response_get_userRole, true);
+		
+		foreach ($allRoles as $role) {
+			foreach ($caps as $key=>$value) {
+				if (strtolower($role['RoleName']) == $key) {
+					$caps[$key] = $role['ID'];
+				}
+			}
+		}
+
+		
+		//clear existing userRole arrays
+		foreach ($userRoleIDs as $id) {
+			$url_userRole_delete = $url_userRole . $id;
+			$response_delete_userRole = wp_remote_delete($url_userRole_delete);
+			if ( is_wp_error( $response_delete_userRole ) || !$response_delete_userRole ) {
+				return false;
+			} 
+		}
+
+		//insert new userRole arrays
+		foreach ($caps as $key=>$value) {
+			$userRole = array();
+			$userRole['UserID'] = $user_id;
+			$userRole['RoleID'] = $value;
+			$userRole['InDate'] = date('c');
+			$userRole['InUser'] = $current_user->user_login;
+
+			$options = array(
+				'headers' => array(
+            		'Content-Type' => 'text/json'
+        		),
+				'body'	=> json_encode($userRole)
+			);
+
+			$response_insert_userRole = wp_remote_post( $url_userRole, $options );
+			if ( is_wp_error( $response_insert_userRole ) || !$response_insert_userRole ) {
+				return false;
+			} 
+		}
+		
+		return true;
 	}
 
 	public static function delete_user($user_id) {

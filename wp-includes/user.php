@@ -773,7 +773,16 @@ function delete_user_meta($user_id, $meta_key, $meta_value = '') {
  * @return mixed Will be an array if $single is false. Will be value of meta data field if $single is true.
  */
 function get_user_meta($user_id, $key = '', $single = false) {
-	return get_metadata('user', $user_id, $key, $single);
+	global $wpapi;
+
+	$usermeta = null;
+	if (strpos($key,'capabilities')) 
+	{
+		$caps = $wpapi->get_wpuser('ID', $user_id)->caps;
+		return $caps;
+	}
+	else
+		return get_metadata('user', $user_id, $key, $single);
 }
 
 /**
@@ -794,6 +803,13 @@ function get_user_meta($user_id, $key = '', $single = false) {
  * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
  */
 function update_user_meta($user_id, $meta_key, $meta_value, $prev_value = '') {
+	global $wpapi;
+
+	//update user and roles relationship through REST API
+	if (strpos($meta_key,'capabilities')) 
+	{
+		$wpapi->update_user_caps($user_id, $meta_value);
+	}
 	return update_metadata('user', $user_id, $meta_key, $meta_value, $prev_value);
 }
 
@@ -1595,6 +1611,7 @@ function wp_insert_user( $userdata ) {
 		if ( $user_email !== $old_user_data->user_email ) {
 			$data['user_activation_key'] = '';
 		}
+		$wpapi->update_user( $ID, $data );
 		$wpdb->update( $wpdb->users, $data, compact( 'ID' ) );
 		$user_id = (int) $ID;
 	} else {
@@ -1635,8 +1652,7 @@ function wp_insert_user( $userdata ) {
 
 	// Update user meta.
 	foreach ( $meta as $key => $value ) {
-		//update_user_meta( $user_id, $key, $value );
-		$wpapi->update_user_meta( $user_id, $key, $value );
+		update_user_meta( $user_id, $key, $value );
 	}
 
 	foreach ( wp_get_user_contact_methods( $user ) as $key => $value ) {
