@@ -170,7 +170,7 @@ class WP_User {
 	 * @return object|false Raw user object
 	 */
 	public static function get_data_by( $field, $value ) {
-		global $wpapi;
+		global $wpdb, $wpapi;
 
 		// 'ID' is an alias of 'id'.
 		if ( 'ID' === $field ) {
@@ -213,15 +213,18 @@ class WP_User {
 			default:
 				return false;
 		}
-// error_log('field in wp_user: '.print_r($field,1));
-// error_log('value in wp_user: '.print_r($value,1));
-// error_log('user_id in wp_user: '.print_r($user_id,1));
+
 		if ( false !== $user_id ) {
 			if ( $user = wp_cache_get( $user_id, 'users' ) )
 				return $user;
 		}
 
-		if ( !$user = $wpapi -> get_user($db_field, $value) )
+		// if ( !$user = $wpapi -> get_user($db_field, $value) )
+		// 	return false;
+
+		if ( !$user = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM $wpdb->users WHERE $db_field = %s", $value
+		) ) )
 			return false;
 
 		update_user_caches( $user );

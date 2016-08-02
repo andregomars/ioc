@@ -521,7 +521,7 @@ function extwpauth_authenticate( $user, $username, $password) {
      return $user;
 }
 
-add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
+//add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
 function wpapi_auth( $user, $username, $password) {
 	global $wpapi;
 

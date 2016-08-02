@@ -17,7 +17,6 @@ class wpapi {
 	}
 
 	public static function get_user($field, $value) {
-
 		$userJSON = null;
 		$url = "";
 		switch( $field ) {
@@ -74,21 +73,63 @@ class wpapi {
 		return $wpuser;
 	}
 
+	//return: user ID
 	public static function insert_user($data) {
-		error_log('insert user from wpapi is: '.print_r($data,1));
-		return 22;
+		global $current_user;
+
+		if ( !$data )
+			return 0;
+
+		$url_user = "http://localhost:52432/api/User/";
+
+		
+		//update user basic info in db by user table id
+		$user_new = array (
+			'LoginName' => $data['user_login'],
+			'Password' => $data['user_pass'],
+			'Email' => $data['user_email'],
+			'Name' => $data['display_name'],
+			'UserType' => 'internal',
+			'CompanyID' => 0,
+			'IsAdmin' => 0,
+			'InDate' => date('c'),
+			'InUser' => $current_user->user_login,
+			'Status' => 'Active' );
+		
+		$options = array(
+			'headers' => array(
+				'Content-Type' => 'text/json'
+			),
+			'body'	=> json_encode($user_new)
+		);
+
+		$response_insert_user = wp_remote_post( $url_user, $options );
+		if ( is_wp_error( $response_insert_user ) || !$response_insert_user ) {
+			return 0;
+		} 
+
+		$responseBody = wp_remote_retrieve_body( $response_insert_user );
+		$user_id = json_decode($responseBody)->ID;
+
+		return $user_id;
 	}
 
 	//return: boolean
-	public static function update_user($user_id, $data) {
+	public static function update_user($user_login, $data) {
 		global $current_user;
 
-		if ( $user_id < 1 || !$data )
+		if ( empty($user_login) || !$data )
+			return false;
+		
+		//fetch user id
+		$iocUser = self::get_user('user_login', $user_login);
+		$user_id = $iocUser->ID;
+
+		if ( !$user_id || $user_id < 1 )
 			return false;
 
+		//get user object from api
 		$url_user = "http://localhost:52432/api/User/" . $user_id;
-
-		//get user object id from api
 		$request_get_user = wp_remote_get( $url_user );
 		$response_get_user = wp_remote_retrieve_body( $request_get_user );
 		if( !$response_get_user )
@@ -116,11 +157,16 @@ class wpapi {
 	}
 
 	//return: boolean
-	public static function update_user_caps($user_id, $caps) {
+	public static function update_user_caps($user_login, $caps) {
 		global $current_user;
-
 		$url_userRole = "http://localhost:52432/api/UserRole/";
 		$url_role = "http://localhost:52432/api/Role/";
+
+		//fetch user id
+		$iocUser = self::get_user('user_login', $user_login);
+		$user_id = $iocUser->ID;
+		if ( !$user_id || $user_id < 1 )
+			return false;
 
 		//get all userRole IDs of the user
 		$request_get_userRole = wp_remote_get( $url_userRole );
@@ -187,8 +233,21 @@ class wpapi {
 		return true;
 	}
 
-	public static function delete_user($user_id) {
-		error_log('delete user from wpapi is: '.print_r($user_id,1));
+	public static function delete_user($user_login) {
+		//fetch user id
+		$iocUser = self::get_user('user_login', $user_login);
+		$user_id = $iocUser->ID;
+		if ( !$user_id || $user_id < 1 )
+			return false;
+		
+		//delete user through api
+		$url_user = "http://localhost:52432/api/User/" . $user_id;
+		$response_delete_user = wp_remote_delete( $url_user, $options );
+		if ( is_wp_error( $response_delete_user ) || !$response_delete_user ) {
+			return false;
+		} 
+
+		return true;
 	}
 
 	public static function get_all_roles() {

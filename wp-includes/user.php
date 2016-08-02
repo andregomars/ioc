@@ -773,15 +773,16 @@ function delete_user_meta($user_id, $meta_key, $meta_value = '') {
  * @return mixed Will be an array if $single is false. Will be value of meta data field if $single is true.
  */
 function get_user_meta($user_id, $key = '', $single = false) {
-	global $wpapi;
+	// global $wpapi;
 
-	$usermeta = null;
-	if (strpos($key,'capabilities')) 
-	{
-		$caps = $wpapi->get_wpuser('ID', $user_id)->caps;
-		return $caps;
-	}
-	else
+	// $usermeta = null;
+	// if (strpos($key,'capabilities')) 
+	// {
+	// 	$user = new WP_User( $user_id );
+	// 	$caps = $wpapi->get_wpuser('user_login', $user->user_login)->caps;
+	// 	return $caps;
+	// }
+	// else
 		return get_metadata('user', $user_id, $key, $single);
 }
 
@@ -808,7 +809,8 @@ function update_user_meta($user_id, $meta_key, $meta_value, $prev_value = '') {
 	//update user and roles relationship through REST API
 	if (strpos($meta_key,'capabilities')) 
 	{
-		$wpapi->update_user_caps($user_id, $meta_value);
+		$user = new WP_User( $user_id );
+		$wpapi->update_user_caps($user->user_login, $meta_value);
 	}
 	return update_metadata('user', $user_id, $meta_key, $meta_value, $prev_value);
 }
@@ -838,7 +840,7 @@ function count_users($strategy = 'time') {
 	$result = array();
 
 	if ( 'time' == $strategy ) {
-		/* Original:
+		
 		$avail_roles = wp_roles()->get_names();
 
 		// Build a CPU-intensive query that will return concise information.
@@ -869,8 +871,8 @@ function count_users($strategy = 'time') {
 
 		$result['total_users'] = $total_users;
 		$result['avail_roles'] =& $role_counts;
-		*/
-		$result = $wpapi->get_counted_users();
+		
+		//$result = $wpapi->get_counted_users();
 	} else {
 		$avail_roles = array(
 			'none' => 0,
@@ -1611,14 +1613,13 @@ function wp_insert_user( $userdata ) {
 		if ( $user_email !== $old_user_data->user_email ) {
 			$data['user_activation_key'] = '';
 		}
-		$wpapi->update_user( $ID, $data );
+		$wpapi->update_user( $user_login, $data );
 		$wpdb->update( $wpdb->users, $data, compact( 'ID' ) );
 		$user_id = (int) $ID;
 	} else {
-		//$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
-		//$user_id = (int) $wpdb->insert_id;
-		$user_id = $wpapi->insert_user($data + compact( 'user_login' ));
-
+		$wpapi->insert_user($data + compact( 'user_login' ));
+		$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
+		$user_id = (int) $wpdb->insert_id;
 	}
 
 	$user = new WP_User( $user_id );

@@ -115,8 +115,8 @@ class WP_Roles {
 			$this->roles = $wp_user_roles;
 			$this->use_db = false;
 		} else {
-			//$this->roles = get_option( $this->role_key );
-			$this->roles = $wpapi->get_all_roles();
+			$this->roles = get_option( $this->role_key );
+			//$this->roles = $wpapi->get_all_roles();
 		}
 
 		if ( empty( $this->roles ) )

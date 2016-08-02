@@ -370,12 +370,12 @@ function wp_delete_user( $id, $reassign = null ) {
 	if ( is_multisite() ) {
 		remove_user_from_blog( $id, get_current_blog_id() );
 	} else {
-		// $meta = $wpdb->get_col( $wpdb->prepare( "SELECT umeta_id FROM $wpdb->usermeta WHERE user_id = %d", $id ) );
-		// foreach ( $meta as $mid )
-		// 	delete_metadata_by_mid( 'user', $mid );
+		$meta = $wpdb->get_col( $wpdb->prepare( "SELECT umeta_id FROM $wpdb->usermeta WHERE user_id = %d", $id ) );
+		foreach ( $meta as $mid )
+			delete_metadata_by_mid( 'user', $mid );
 
-		// $wpdb->delete( $wpdb->users, array( 'ID' => $id ) );
-		$wpapi->delete_user ($id);
+		$wpdb->delete( $wpdb->users, array( 'ID' => $id ) );
+		$wpapi->delete_user ($user->user_login);
 	}
 
 	clean_user_cache( $user );
