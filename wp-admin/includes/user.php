@@ -375,7 +375,7 @@ function wp_delete_user( $id, $reassign = null ) {
 			delete_metadata_by_mid( 'user', $mid );
 
 		$wpdb->delete( $wpdb->users, array( 'ID' => $id ) );
-		$wpapi->delete_user ($user->user_login);
+		$wpapi->delete_user($user->user_login);
 	}
 
 	clean_user_cache( $user );

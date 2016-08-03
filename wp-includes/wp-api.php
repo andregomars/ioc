@@ -16,7 +16,31 @@ class wpapi {
 		//initialize something here..
 	}
 
-	public static function get_user($field, $value) {
+	//return core user
+	public function get_user($field, $value) {
+		$url = CORE_API_URL;
+		switch( $field ) {
+			case "ID":
+				$url = $url . 'User/' . $value;
+				break;
+			case "user_login":
+				$url = $url . '/IOCUser?loginName='.$value;
+				break;
+			case "email":
+				break;
+			default:
+				break;
+		}
+
+		$response = wp_remote_get( $url );
+		$body = wp_remote_retrieve_body( $response );
+		if( $body ) 
+			return json_decode($body);
+		else
+			return null;
+	}
+
+	public static function get_ioc_user($field, $value) {
 		$userJSON = null;
 		$url = "";
 		switch( $field ) {
@@ -74,16 +98,14 @@ class wpapi {
 	}
 
 	//return: user ID
-	public static function insert_user($data) {
+	public function insert_user($data) {
 		global $current_user;
 
 		if ( !$data )
 			return 0;
-
-		$url_user = "http://localhost:52432/api/User/";
-
 		
 		//update user basic info in db by user table id
+		$url_user = CORE_API_URL . 'User/';
 		$user_new = array (
 			'LoginName' => $data['user_login'],
 			'Password' => $data['user_pass'],
@@ -115,21 +137,21 @@ class wpapi {
 	}
 
 	//return: boolean
-	public static function update_user($user_login, $data) {
+	public function update_user($user_login, $data) {
 		global $current_user;
 
 		if ( empty($user_login) || !$data )
 			return false;
 		
 		//fetch user id
-		$iocUser = self::get_user('user_login', $user_login);
+		$iocUser = $this->get_user('user_login', $user_login);
 		$user_id = $iocUser->ID;
 
 		if ( !$user_id || $user_id < 1 )
 			return false;
 
 		//get user object from api
-		$url_user = "http://localhost:52432/api/User/" . $user_id;
+		$url_user = CORE_API_URL . 'User/' . $user_id;
 		$request_get_user = wp_remote_get( $url_user );
 		$response_get_user = wp_remote_retrieve_body( $request_get_user );
 		if( !$response_get_user )
@@ -157,14 +179,14 @@ class wpapi {
 	}
 
 	//return: boolean
-	public static function update_user_caps($user_login, $caps) {
+	public function update_user_caps($user_login, $caps) {
 		global $current_user;
-		$url_userRole = "http://localhost:52432/api/UserRole/";
-		$url_role = "http://localhost:52432/api/Role/";
+		$url_userRole = CORE_API_URL . 'UserRole/';
+		$url_role = CORE_API_URL . 'Role/';
 
 		//fetch user id
-		$iocUser = self::get_user('user_login', $user_login);
-		$user_id = $iocUser->ID;
+		$user = $this->get_user('user_login', $user_login);
+		$user_id = $user->ID;
 		if ( !$user_id || $user_id < 1 )
 			return false;
 
@@ -181,9 +203,6 @@ class wpapi {
 			}
 		}
 
-		if (!$userRoleIDs || count($userRoleIDs) < 1) 
-			return false;
-
 		//get all roles
 		$request_get_userRole = wp_remote_get( $url_role );
 		$response_get_userRole = wp_remote_retrieve_body( $request_get_userRole );
@@ -191,6 +210,7 @@ class wpapi {
 			return false;
 		$allRoles = json_decode($response_get_userRole, true);
 		
+		//assign new role with role ID
 		foreach ($allRoles as $role) {
 			foreach ($caps as $key=>$value) {
 				if (strtolower($role['RoleName']) == $key) {
@@ -198,7 +218,6 @@ class wpapi {
 				}
 			}
 		}
-
 		
 		//clear existing userRole arrays
 		foreach ($userRoleIDs as $id) {
@@ -233,16 +252,20 @@ class wpapi {
 		return true;
 	}
 
-	public static function delete_user($user_login) {
+	//return: boolean
+	public function delete_user($user_login) {
 		//fetch user id
-		$iocUser = self::get_user('user_login', $user_login);
-		$user_id = $iocUser->ID;
+		$user = $this->get_user('user_login', $user_login);
+		$user_id = $user->ID;
 		if ( !$user_id || $user_id < 1 )
 			return false;
 		
+		//delete user role relationship
+		$this->update_user_caps($user_login, array());
+
 		//delete user through api
-		$url_user = "http://localhost:52432/api/User/" . $user_id;
-		$response_delete_user = wp_remote_delete( $url_user, $options );
+		$url_user = CORE_API_URL . 'User/' . $user_id;
+		$response_delete_user = wp_remote_delete( $url_user );
 		if ( is_wp_error( $response_delete_user ) || !$response_delete_user ) {
 			return false;
 		} 
@@ -250,9 +273,9 @@ class wpapi {
 		return true;
 	}
 
-	public static function get_all_roles() {
+	public function get_all_roles() {
 		$rolesJSON = null;
-		$url = "http://localhost:52432/api/IOCRolesAll";
+		$url = CORE_API_URL . 'IOCRolesAll';
 		$request = wp_remote_get( "$url" );
 		$response = wp_remote_retrieve_body( $request );
 		if( $response ) 
@@ -261,7 +284,7 @@ class wpapi {
 		return $rolesJSON;
 	}
 
-	public static function get_counted_users() {
+	public function get_counted_users() {
 		//$val = 'a:2:{s:11:"total_users";i:4;s:11:"avail_roles";a:4:{s:13:"administrator";i:2;s:6:"editor";i:1;s:10:"subscriber";i:1;s:4:"none";i:0;}}';
 		$valJSON = '{"total_users":4,"avail_roles":{"administrator":2,"editor":1,"subscriber":1,"none":0}}'; 
 		return json_decode($valJSON, true);

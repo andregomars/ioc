@@ -278,10 +278,11 @@ class WP_User {
 		if ( isset( self::$back_compat_keys[ $key ] ) )
 			$key = self::$back_compat_keys[ $key ];
 
-		if ( !$user = $wpapi -> get_user($key, $this->ID) )
-			return false;
-
-		return true;
+		// if ( !$user = $wpapi -> get_user($key, $this->ID) )
+		// 	return false;
+		// 
+		// return true;
+		return metadata_exists( 'user', $this->ID, $key );
 	}
 
 	/**
