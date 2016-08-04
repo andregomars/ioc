@@ -40,63 +40,6 @@ class wpapi {
 			return null;
 	}
 
-	public static function get_ioc_user($field, $value) {
-		$userJSON = null;
-		$url = "";
-		switch( $field ) {
-			case "ID":
-				$url = "http://localhost:52432/api/IOCUser/".$value;
-				break;
-			case "user_login":
-				$url = "http://localhost:52432/api/IOCUser?loginName=".$value;
-				break;
-			case "email":
-				break;
-			default:
-				break;
-		}
-		
-		$request = wp_remote_get( $url );
-		$response = wp_remote_retrieve_body( $request );
-		if( $response ) 
-			$userJSON = json_decode($response, true);
-
-		return (object)$userJSON;
-	}
-
-	public static function get_wpuser($field, $value) {
-		$wpuser = new WP_User();
-
-		$wpuserJSON = null;
-		$url = "";
-		switch( $field ) {
-			case "ID":
-				$url = "http://localhost:52432/api/IOCUserInfo/".$value;
-				break;
-			case "user_login":
-				$url = "http://localhost:52432/api/IOCUserInfo?loginName=".$value;
-				break;
-			default:
-				break;
-		}
-
-		$request = wp_remote_get( $url );
-		$response = wp_remote_retrieve_body( $request );
-		if( !$response )
-			return null;
-
-		$wpuserJSON = (object)json_decode($response, true);
-		$wpuser->ID = $wpuserJSON->ID;
-		$wpuser->cap_key = $wpuserJSON->cap_key;
-		$wpuser->caps = $wpuserJSON->caps;
-		$wpuser->data = (object)$wpuserJSON->data;
-		$wpuser->filter = $wpuserJSON->filter;
-		$wpuser->roles = $wpuserJSON->roles;
-		$wpuser->allcaps = $wpuserJSON->allcaps;
-
-		return $wpuser;
-	}
-
 	//return: user ID
 	public function insert_user($data) {
 		global $current_user;
@@ -284,11 +227,6 @@ class wpapi {
 		return $rolesJSON;
 	}
 
-	public function get_counted_users() {
-		//$val = 'a:2:{s:11:"total_users";i:4;s:11:"avail_roles";a:4:{s:13:"administrator";i:2;s:6:"editor";i:1;s:10:"subscriber";i:1;s:4:"none";i:0;}}';
-		$valJSON = '{"total_users":4,"avail_roles":{"administrator":2,"editor":1,"subscriber":1,"none":0}}'; 
-		return json_decode($valJSON, true);
-	}
 
 	//duplicate from wpdb
 	public function show_errors( $show = true ) {
@@ -298,5 +236,69 @@ class wpapi {
 	}
 
 
+/*
+	public function get_counted_users() {
+		//$val = 'a:2:{s:11:"total_users";i:4;s:11:"avail_roles";a:4:{s:13:"administrator";i:2;s:6:"editor";i:1;s:10:"subscriber";i:1;s:4:"none";i:0;}}';
+		$valJSON = '{"total_users":4,"avail_roles":{"administrator":2,"editor":1,"subscriber":1,"none":0}}'; 
+		return json_decode($valJSON, true);
+	}
+
+	public static function get_ioc_user($field, $value) {
+		$userJSON = null;
+		$url = "";
+		switch( $field ) {
+			case "ID":
+				$url = "http://localhost:52432/api/IOCUser/".$value;
+				break;
+			case "user_login":
+				$url = "http://localhost:52432/api/IOCUser?loginName=".$value;
+				break;
+			case "email":
+				break;
+			default:
+				break;
+		}
+		
+		$request = wp_remote_get( $url );
+		$response = wp_remote_retrieve_body( $request );
+		if( $response ) 
+			$userJSON = json_decode($response, true);
+
+		return (object)$userJSON;
+	}
+
+	public static function get_wpuser($field, $value) {
+		$wpuser = new WP_User();
+
+		$wpuserJSON = null;
+		$url = "";
+		switch( $field ) {
+			case "ID":
+				$url = "http://localhost:52432/api/IOCUserInfo/".$value;
+				break;
+			case "user_login":
+				$url = "http://localhost:52432/api/IOCUserInfo?loginName=".$value;
+				break;
+			default:
+				break;
+		}
+
+		$request = wp_remote_get( $url );
+		$response = wp_remote_retrieve_body( $request );
+		if( !$response )
+			return null;
+
+		$wpuserJSON = (object)json_decode($response, true);
+		$wpuser->ID = $wpuserJSON->ID;
+		$wpuser->cap_key = $wpuserJSON->cap_key;
+		$wpuser->caps = $wpuserJSON->caps;
+		$wpuser->data = (object)$wpuserJSON->data;
+		$wpuser->filter = $wpuserJSON->filter;
+		$wpuser->roles = $wpuserJSON->roles;
+		$wpuser->allcaps = $wpuserJSON->allcaps;
+
+		return $wpuser;
+	}
+*/
 
 }
