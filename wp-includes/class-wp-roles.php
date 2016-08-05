@@ -229,12 +229,16 @@ class WP_Roles {
 	 * @param bool $grant Optional, default is true. Whether role is capable of performing capability.
 	 */
 	public function add_cap( $role, $cap, $grant = true ) {
+		global $wpapi;
+
 		if ( ! isset( $this->roles[$role] ) )
 			return;
 
 		$this->roles[$role]['capabilities'][$cap] = $grant;
-		if ( $this->use_db )
+		if ( $this->use_db ) {
 			update_option( $this->role_key, $this->roles );
+			$wpapi->update_roles( $this->roles );
+		}
 	}
 
 	/**

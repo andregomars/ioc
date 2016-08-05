@@ -16,6 +16,14 @@ class wpapi {
 		//initialize something here..
 	}
 
+
+	//duplicate from wpdb
+	public function show_errors( $show = true ) {
+		$errors = $this->show_errors;
+		$this->show_errors = $show;
+		return $errors;
+	}
+
 	//return core user
 	public function get_user($field, $value) {
 		$url = CORE_API_URL;
@@ -228,15 +236,53 @@ class wpapi {
 	}
 
 
-	//duplicate from wpdb
-	public function show_errors( $show = true ) {
-		$errors = $this->show_errors;
-		$this->show_errors = $show;
-		return $errors;
+	//return boolean
+	public function update_roles($roles) {
+		global $current_user;
+
+		$user = $current_user->user_login;
+		$roleList = array();
+		$capList = array();
+		foreach($roles as $key=>$value) {
+			$roleItem = array(
+				'ID' => 0,
+				'RoleName' => $key,
+				'RoleType' => 'internal',
+				'RoleDescription' => $value['name'],
+				'InDate' => date('c'),
+				'InUser' => $user,
+				'EditDate' => null,
+				'EditUser' => null,
+				'Status' => 'Active' );
+			array_push($roleList, $roleItem);
+
+			foreach($value['capabilities'] as $key=>$value) {
+
+				$capItem = array(
+					'ID' => 0,
+					'MenuID' => 0,
+					'FunctionName' => $key,
+					'FunctionDescription' => $key,
+					'FunctionType' => 'WebFront',
+					'Priority' => 0,
+					'InDate' => null,
+					'InUser' => null,
+					'EditDate' => null,
+					'EditUser' => null,
+					'Status' => $value? 'Active' : 'Inactive' );
+				if ( in_array($capItem, $capList) )
+					continue;
+				array_push($capList, $capItem);
+			}
+		}  
+
+error_log('roleList are: ' . print_r($roleList, 1));
+error_log('capList are: ' . print_r($capList, 1));
+
 	}
 
-
 /*
+
 	public function get_counted_users() {
 		//$val = 'a:2:{s:11:"total_users";i:4;s:11:"avail_roles";a:4:{s:13:"administrator";i:2;s:6:"editor";i:1;s:10:"subscriber";i:1;s:4:"none";i:0;}}';
 		$valJSON = '{"total_users":4,"avail_roles":{"administrator":2,"editor":1,"subscriber":1,"none":0}}'; 
