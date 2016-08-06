@@ -240,23 +240,24 @@ class wpapi {
 	public function update_roles($roles) {
 		global $current_user;
 
+		//grab roles and caps individually
 		$user = $current_user->user_login;
 		$roleList = array();
 		$capList = array();
-		foreach($roles as $key=>$value) {
+		foreach($roles as $keyRole=>$valueRole) {
 			$roleItem = array(
 				'ID' => 0,
-				'RoleName' => $key,
+				'RoleName' => $keyRole,
 				'RoleType' => 'internal',
-				'RoleDescription' => $value['name'],
+				'RoleDescription' => $valueRole['name'],
 				'InDate' => date('c'),
 				'InUser' => $user,
-				'EditDate' => null,
-				'EditUser' => null,
+				'EditDate' => date('c'),
+				'EditUser' => $user,
 				'Status' => 'Active' );
 			array_push($roleList, $roleItem);
 
-			foreach($value['capabilities'] as $key=>$value) {
+			foreach($valueRole['capabilities'] as $key=>$value) {
 
 				$capItem = array(
 					'ID' => 0,
@@ -265,10 +266,10 @@ class wpapi {
 					'FunctionDescription' => $key,
 					'FunctionType' => 'WebFront',
 					'Priority' => 0,
-					'InDate' => null,
-					'InUser' => null,
-					'EditDate' => null,
-					'EditUser' => null,
+					'InDate' => date('c'),
+					'InUser' => $user,
+					'EditDate' => date('c'),
+					'EditUser' => $user,
 					'Status' => $value? 'Active' : 'Inactive' );
 				if ( in_array($capItem, $capList) )
 					continue;
@@ -276,9 +277,77 @@ class wpapi {
 			}
 		}  
 
-error_log('roleList are: ' . print_r($roleList, 1));
-error_log('capList are: ' . print_r($capList, 1));
 
+		//update roles through Roles batch api
+		$url_roles = CORE_API_URL . 'Role/Batch';
+		$optRoles = array(
+			'headers' => array(
+        		'Content-Type' => 'text/json'
+    		),
+			'body'	=> json_encode($roleList)
+		);
+
+		$response_update_roles = wp_remote_post( $url_roles, $optRoles );
+		$response_update_roles_boday = wp_remote_retrieve_body( $response_update_roles );
+		if ( !$response_update_roles_boday ) {
+			return false;
+		} 
+		$new_roles = json_decode($response_update_roles_boday, true);
+
+
+		//update caps through Function batch api
+		$url_caps = CORE_API_URL . 'Function/Batch';
+		$optCaps = array(
+			'headers' => array(
+        		'Content-Type' => 'text/json'
+    		),
+			'body'	=> json_encode($capList)
+		);
+
+		$response_update_caps = wp_remote_post( $url_caps, $optCaps );
+		$response_update_caps_body = wp_remote_retrieve_body( $response_update_caps );
+		if ( !$response_update_caps_body ) 
+			return false;
+		$new_caps = json_decode($response_update_caps_body, true);
+
+
+		//map role <-> cap relationships list
+		$permissionList = array();
+		foreach($roles as $key_role=>$value_caps) {
+			$idx_role = array_search($key_role, array_column($new_roles, 'RoleName'));
+			$role_ID = $new_roles[$idx_role]['ID'];
+
+			foreach($value_caps['capabilities'] as $cap_name=>$cap_granted) {
+				$idx_cap = array_search($cap_name, array_column($new_caps, 'FunctionName'));
+				$cap_ID = $new_caps[$idx_cap]['ID'];
+				$permissionItem = array(
+					'ID' => 0,
+					'RoleID' => $role_ID,
+					'FunctionID' => $cap_ID,
+					'InDate' => date('c'),
+					'InUser' => $user,
+					'EditDate' => date('c'),
+					'EditUser' => $user,
+					'Status' => $cap_granted? 'Active' : 'Inactive' );
+				array_push($permissionList, $permissionItem);
+			}
+		}  
+
+		//update role <-> cap list through Permission batch api
+		$url_permissions = CORE_API_URL . 'Permission/Batch';
+		$optPermissions = array(
+			'headers' => array(
+        		'Content-Type' => 'text/json'
+    		),
+			'body'	=> json_encode($permissionList)
+		);
+
+		$response_update_permissions = wp_remote_post( $url_permissions, $optPermissions );
+		if ( is_wp_error( $response_update_permissions ) || !$response_update_permissions ) {
+			return false;
+		} 
+
+		return true;
 	}
 
 /*
