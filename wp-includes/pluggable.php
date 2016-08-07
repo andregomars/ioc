@@ -916,7 +916,7 @@ function wp_set_auth_cookie( $user_id, $remember = false, $secure = '', $token =
 	setcookie($auth_cookie_name, $auth_cookie, $expire, ADMIN_COOKIE_PATH, COOKIE_DOMAIN, $secure, true);
 	setcookie(LOGGED_IN_COOKIE, $logged_in_cookie, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure_logged_in_cookie, true);
 //by andre
-   	setcookie(IOC_LOGGED_IN_COOKIE, $ioc_auth_cookie, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure, true);
+   	setcookie(IOC_LOGGED_IN_COOKIE, $ioc_auth_cookie, $expire, "/", COOKIE_DOMAIN, $secure, true);
 //by andre end
 	if ( COOKIEPATH != SITECOOKIEPATH )
 		setcookie(LOGGED_IN_COOKIE, $logged_in_cookie, $expire, SITECOOKIEPATH, COOKIE_DOMAIN, $secure_logged_in_cookie, true);
@@ -937,7 +937,7 @@ function wp_clear_auth_cookie() {
 	 */
 	do_action( 'clear_auth_cookie' );
 //by andre
-setcookie( IOC_LOGGED_IN_COOKIE,        ' ', time() - YEAR_IN_SECONDS, SITECOOKIEPATH,   COOKIE_DOMAIN );
+setcookie( IOC_LOGGED_IN_COOKIE,        ' ', time() - YEAR_IN_SECONDS, "/",   COOKIE_DOMAIN );
 //by andre end
 	setcookie( AUTH_COOKIE,        ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN );
 	setcookie( SECURE_AUTH_COOKIE, ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN );
