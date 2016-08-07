@@ -918,4 +918,21 @@ class WP_Http {
 		return false;
 	}
 
+	/**
+	 *  by andre
+	 */
+	public function put($url, $args = array()) {
+		$defaults = array('method' => 'PUT');
+		$r = wp_parse_args( $args, $defaults );
+		return $this->request($url, $r);
+	}
+
+	/**
+	 *  by andre
+	 */
+	public function delete($url, $args = array()) {
+		$defaults = array('method' => 'DELETE');
+		$r = wp_parse_args( $args, $defaults );
+		return $this->request($url, $r);
+	}
 }
