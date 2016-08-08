@@ -33,7 +33,7 @@
  * @link http://www.openwall.com/phpass/
  * @since 2.5.0
  */
-class PasswordHash.Bak {
+class PasswordHash {
 	var $itoa64;
 	var $iteration_count_log2;
 	var $portable_hashes;
