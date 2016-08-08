@@ -221,25 +221,29 @@ function wp_cookie_constants() {
 	 * @since 2.5.0
 	 */
 	if ( !defined('AUTH_COOKIE') )
-		define('AUTH_COOKIE', 'wordpress_' . COOKIEHASH);
+		define('AUTH_COOKIE', 'ioc_' . COOKIEHASH);
+	//define('AUTH_COOKIE', 'wordpress_' . COOKIEHASH);
 
 	/**
 	 * @since 2.6.0
 	 */
 	if ( !defined('SECURE_AUTH_COOKIE') )
-		define('SECURE_AUTH_COOKIE', 'wordpress_sec_' . COOKIEHASH);
+		define('SECURE_AUTH_COOKIE', 'ioc_sec_' . COOKIEHASH);
+//		define('SECURE_AUTH_COOKIE', 'wordpress_sec_' . COOKIEHASH);
 
 	/**
 	 * @since 2.6.0
 	 */
 	if ( !defined('LOGGED_IN_COOKIE') )
-		define('LOGGED_IN_COOKIE', 'wordpress_logged_in_' . COOKIEHASH);
+		define('LOGGED_IN_COOKIE', 'ioc_logged_in_' . COOKIEHASH);
+	// define('LOGGED_IN_COOKIE', 'wordpress_logged_in_' . COOKIEHASH);
 
 	/**
 	 * @since 2.3.0
 	 */
 	if ( !defined('TEST_COOKIE') )
-		define('TEST_COOKIE', 'wordpress_test_cookie');
+		define('TEST_COOKIE', 'ioc_verify_cookie_enable');
+	// define('TEST_COOKIE', 'wordpress_test_cookie');
 
 	/**
 	 * @since 1.2.0

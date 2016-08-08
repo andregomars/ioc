@@ -400,9 +400,9 @@ if ( defined( 'RELOCATE' ) && RELOCATE ) { // Move flag is set
 
 //Set a cookie now to see if they are supported by the browser.
 $secure = ( 'https' === parse_url( wp_login_url(), PHP_URL_SCHEME ) );
-setcookie( TEST_COOKIE, 'WP Cookie check', 0, COOKIEPATH, COOKIE_DOMAIN, $secure );
+setcookie( TEST_COOKIE, 'ioc cookie check', 0, COOKIEPATH, COOKIE_DOMAIN, $secure );
 if ( SITECOOKIEPATH != COOKIEPATH )
-	setcookie( TEST_COOKIE, 'WP Cookie check', 0, SITECOOKIEPATH, COOKIE_DOMAIN, $secure );
+	setcookie( TEST_COOKIE, 'ioc cookie check', 0, SITECOOKIEPATH, COOKIE_DOMAIN, $secure );
 
 /**
  * Fires when the login form is initialized.

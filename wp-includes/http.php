@@ -664,3 +664,19 @@ function wp_parse_url( $url ) {
 
 	return $parts;
 }
+
+/**
+ * by andre
+ */
+function wp_remote_put($url, $args = array()) {
+	$http = _wp_http_get_object();
+	return $http->put( $url, $args );
+}
+
+/**
+ * by andre
+ */
+function wp_remote_delete($url, $args = array()) {
+	$http = _wp_http_get_object();
+	return $http->delete( $url, $args );
+}
