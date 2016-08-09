@@ -32,7 +32,7 @@ class wpapi {
 				$url = $url . 'User/' . $value;
 				break;
 			case "user_login":
-				$url = $url . '/IOCUser?loginName='.$value;
+				$url = $url . 'User?loginName='.$value;
 				break;
 			case "email":
 				break;
@@ -62,12 +62,13 @@ class wpapi {
 			'Password' => $data['user_pass'],
 			'Email' => $data['user_email'],
 			'Name' => $data['display_name'],
-			'UserType' => 'internal',
-			'CompanyID' => 0,
-			'IsAdmin' => 0,
+			'UserType' => 4,
+			'CompanyID' => 21,
+			'ValidDate' => date('c'),
+			'IsActive' => 1,
 			'InDate' => date('c'),
 			'InUser' => $current_user->user_login,
-			'Status' => 'Active' );
+			'Status' => 0 );
 		
 		$options = array(
 			'headers' => array(
@@ -224,17 +225,6 @@ class wpapi {
 		return true;
 	}
 
-	public function get_all_roles() {
-		$rolesJSON = null;
-		$url = CORE_API_URL . 'IOCRolesAll';
-		$request = wp_remote_get( "$url" );
-		$response = wp_remote_retrieve_body( $request );
-		if( $response ) 
-			$rolesJSON = json_decode($response, true);
-
-		return $rolesJSON;
-	}
-
 
 	//return boolean
 	public function update_roles($roles) {
@@ -253,8 +243,7 @@ class wpapi {
 				'InDate' => date('c'),
 				'InUser' => $user,
 				'EditDate' => date('c'),
-				'EditUser' => $user,
-				'Status' => 'Active' );
+				'EditUser' => $user );
 			array_push($roleList, $roleItem);
 
 			foreach($valueRole['capabilities'] as $key=>$value) {
@@ -269,8 +258,7 @@ class wpapi {
 					'InDate' => date('c'),
 					'InUser' => $user,
 					'EditDate' => date('c'),
-					'EditUser' => $user,
-					'Status' => $value? 'Active' : 'Inactive' );
+					'EditUser' => $user );
 				if ( in_array($capItem, $capList) )
 					continue;
 				array_push($capList, $capItem);
@@ -328,7 +316,7 @@ class wpapi {
 					'InUser' => $user,
 					'EditDate' => date('c'),
 					'EditUser' => $user,
-					'Status' => $cap_granted? 'Active' : 'Inactive' );
+					'IsEnabled' => (int)$cap_granted );
 				array_push($permissionList, $permissionItem);
 			}
 		}  
@@ -351,6 +339,18 @@ class wpapi {
 	}
 
 /*
+
+
+	public function get_all_roles() {
+		$rolesJSON = null;
+		$url = CORE_API_URL . 'IOCRolesAll';
+		$request = wp_remote_get( "$url" );
+		$response = wp_remote_retrieve_body( $request );
+		if( $response ) 
+			$rolesJSON = json_decode($response, true);
+
+		return $rolesJSON;
+	}
 
 	public function get_counted_users() {
 		//$val = 'a:2:{s:11:"total_users";i:4;s:11:"avail_roles";a:4:{s:13:"administrator";i:2;s:6:"editor";i:1;s:10:"subscriber";i:1;s:4:"none";i:0;}}';
