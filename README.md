@@ -10,7 +10,7 @@ IOC Webfront
 
 
 ToDo:
-* table structurer sync
+* ~~table structurer sync~~
 * api get user id, name and usertype, sample
 intput: user ID
 output -> input of current user validation logic
