@@ -498,7 +498,24 @@ function save_company_id_in_profile( $user_id ) {
     error_log('company id when saving is: ' . $company_id);
 }
 
+/*
+ * add Company ID column header in user list
+ */
+add_filter('manage_users_columns', 'add_users_column_company_id');
+function add_users_column_company_id($columns) {
+    $columns['company_id'] = 'Company ID';
+    return $columns;
+}
 
+/*
+ * fill company ID column values in user list
+ */
+add_action('manage_users_custom_column',  'manage_users_column_company_id', 10, 3);
+function manage_users_column_company_id($value, $column_name, $user_id) {
+	if ( 'company_id' == $column_name )
+		return "22";
+		//return $value . '<br/>'. get_user_meta('city', $user_id);
+}
 
 //add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
 function wpapi_auth( $user, $username, $password) {
