@@ -353,6 +353,7 @@ function sydney_recommend_plugin() {
 /**
  * remove wp logo, updates, comments from admin bar in the top
  */
+add_action( 'wp_before_admin_bar_render', 'remove_admin_bar_links' );
 function remove_admin_bar_links() {
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');          // Remove the WordPress logo
@@ -369,17 +370,17 @@ function remove_admin_bar_links() {
     // $wp_admin_bar->remove_menu('w3tc');             // If you use w3 total cache remove the performance link
     // $wp_admin_bar->remove_menu('my-account');       // Remove the user details tab
 }
-add_action( 'wp_before_admin_bar_render', 'remove_admin_bar_links' );
 
 
-
+add_action('login_head', 'custom_login_logo');
 function custom_login_logo() {
 	echo '<style type="text/css">
 			h1 a { background-image: url('.get_bloginfo('template_directory').'/images/logo.login.png) !important;  }
 	</style>';
 }
-add_action('login_head', 'custom_login_logo');
 
+
+add_action( 'admin_menu', 'remove_menus' );
 function remove_menus(){
   
   remove_menu_page( 'index.php' );                  //Dashboard
@@ -395,40 +396,39 @@ function remove_menus(){
   //remove_menu_page( 'options-general.php' );        //Settings
   
 }
-add_action( 'admin_menu', 'remove_menus' );
 
 /*
  * replace wp-admin to admin folder
 */
+add_filter('site_url',  'wpadmin_filter', 10, 3);
 function wpadmin_filter( $url, $path, $orig_scheme ) {
   $old  = array( "/(wp-admin)/");
   $admin_dir = WP_ADMIN_DIR;
   $new  = array($admin_dir);
   return preg_replace( $old, $new, $url, 1);
  }
-add_filter('site_url',  'wpadmin_filter', 10, 3);
 
 /*
  * replace login logo link and tooltip
 */
+add_filter('login_headerurl','loginpage_custom_link');
 function loginpage_custom_link() {
 	return get_site_url();
 }
-add_filter('login_headerurl','loginpage_custom_link');
 
+add_filter('login_headertitle', 'change_title_on_logo');
 function change_title_on_logo() {
 	return get_bloginfo('name');
 }
-add_filter('login_headertitle', 'change_title_on_logo');
 
 /*
  * remove help tab in admin page right up corner
  */
+add_action( 'admin_head', 'hide_update_notice_to_all_but_admin_users', 998 );
 function hide_update_notice_to_all_but_admin_users()
 {
     remove_action( 'admin_notices', 'update_nag', 3 );
 }
-add_action( 'admin_head', 'hide_update_notice_to_all_but_admin_users', 998 );
 
 /*
  * remove sydney theme recommended plugin notices
@@ -443,6 +443,61 @@ function remove_help($old_help, $screen_id, $screen){
     return $old_help;
 }
 add_filter( 'contextual_help', 'remove_help', 999, 3 );
+
+
+
+/*
+ * To show the extra profile of company ID
+ * Note there are two actions tags. show_user_profile is for showing the form on your own profile, and edit_user_profile is for showing it on everyone else’s.
+ */
+add_action( 'show_user_profile', 'show_company_id_in_profile' );
+add_action( 'edit_user_profile', 'show_company_id_in_profile' );
+function show_company_id_in_profile( $user ) { ?>
+ 
+    <h3>Extra profile information</h3>
+ 
+    <table class="form-table">
+ 
+        <tr>
+            <th><label for="twitter">Comapny ID</label></th>
+ 
+            <td>
+                <input type="text" name="companyID" id="companyID" value="<?php echo esc_attr( get_the_author_meta( 'company_id', $user->ID ) ); ?>" class="regular-text" /><br />
+                <span class="description">Please set I/O Controls Company ID.</span>
+            </td>
+        </tr>
+ 
+    </table>
+<?php 
+}
+
+/*
+ * Get company id from other external resouce
+ */
+add_filter( 'get_the_author_company_id', 'get_user_company_id', 999, 3 );
+function get_user_company_id($value, $user_id, $original_user_id){
+	error_log('get_user_company_id filter');
+	error_log('value: ' . $value);
+	error_log('user_id: ' . $user_id);
+	error_log('original_user_id: ' . $original_user_id);
+    return 2;
+}
+
+/* To save the extra profile of company code
+ * Also note the two add_action functions. Similar to above one of them applies to your own profile page, and the other to everyone elses.
+ */
+add_action( 'personal_options_update', 'save_company_id_in_profile' );
+add_action( 'edit_user_profile_update', 'save_company_id_in_profile' );
+function save_company_id_in_profile( $user_id ) {
+ 
+    if ( !current_user_can( 'edit_user', $user_id ) )
+        return false;
+ 
+    //update_usermeta( absint( $user_id ), 'company_id', wp_kses_post( $_POST['companyID'] ) );
+    $company_id = wp_kses_post( $_POST['companyID'] );
+    error_log('company id when saving is: ' . $company_id);
+}
+
 
 
 //add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
