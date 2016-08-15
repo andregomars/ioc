@@ -515,7 +515,7 @@ class WP_User_Query {
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public function query() {
-		global $wpdb;
+		global $wpdb, $current_user;
 
 		$qv =& $this->query_vars;
 
@@ -544,6 +544,36 @@ class WP_User_Query {
 		if ( !$this->results )
 			return;
 
+/*
+ * To add filter out unqualified users from  user query list.
+ */
+//by andre
+		if ( 'all_with_meta' == $qv['fields'] ) {
+			cache_users( $this->results );
+
+			$r = array();
+			foreach ( $this->results as $rid => $userid ) {
+				$u = new WP_User( $userid, '', $qv['blog_id'] );
+				$name = $u->user_login;
+				if ($name != $current_user->user_login) {
+					unset($this->results[$rid]);
+				}
+				else {
+					$r[ $userid ] = $u;
+				}
+			}
+
+			$this->results = $r;
+		} elseif ( 'all' == $qv['fields'] ) {
+			foreach ( $this->results as $key => $user ) {
+				$this->results[ $key ] = new WP_User( $user, '', $qv['blog_id'] );
+			}
+		}
+//by andre end
+
+
+// Original
+/*
 		if ( 'all_with_meta' == $qv['fields'] ) {
 			cache_users( $this->results );
 
@@ -557,6 +587,7 @@ class WP_User_Query {
 				$this->results[ $key ] = new WP_User( $user, '', $qv['blog_id'] );
 			}
 		}
+*/
 	}
 
 	/**
