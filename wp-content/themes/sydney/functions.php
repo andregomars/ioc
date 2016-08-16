@@ -450,23 +450,38 @@ add_filter( 'contextual_help', 'remove_help', 999, 3 );
  * To show the extra profile of company ID
  * Note there are two actions tags. show_user_profile is for showing the form on your own profile, and edit_user_profile is for showing it on everyone else’s.
  */
-add_action( 'show_user_profile', 'show_company_id_in_profile' );
-add_action( 'edit_user_profile', 'show_company_id_in_profile' );
-function show_company_id_in_profile( $user ) { ?>
+add_action( 'show_user_profile', 'show_extra_in_profile' );
+add_action( 'edit_user_profile', 'show_extra_in_profile' );
+function show_extra_in_profile( $user ) { ?>
  
     <h3>Extra profile information</h3>
  
     <table class="form-table">
  
         <tr>
-            <th><label for="twitter">Comapny ID</label></th>
+            <th><label>Comapny ID</label></th>
  
             <td>
                 <input type="text" name="companyID" id="companyID" value="<?php echo esc_attr( get_the_author_meta( 'company_id', $user->ID ) ); ?>" class="regular-text" /><br />
                 <span class="description">Please set I/O Controls Company ID.</span>
             </td>
         </tr>
- 
+        <tr>
+        	<th><label>Role Type</label></th>
+        	<td>
+        		<select name="dpl_user_type" id="dpl_user_type">
+	        	<?php
+	        		$ulist = get_the_author_meta( 'user_type', $user->ID );
+		 			foreach ( $ulist as $key => $value ) {
+				?>
+					<option value=<?php echo $value; ?>><?php echo $key; ?></option>
+				<?php
+					}
+				?>
+				</select><br/>
+				<span class="description">Please select a User Type.</span>
+        	</td>
+        </tr>
     </table>
 <?php 
 }
@@ -483,19 +498,33 @@ function get_user_company_id($value, $user_id, $original_user_id){
     return 2;
 }
 
+/*
+ * Get uer type dictionary list from other external resouce
+ */
+add_filter( 'get_the_author_user_type', 'get_user_type_list', 999, 3 );
+function get_user_type_list($value, $user_id, $original_user_id){
+	return array (
+		'IO Control Admin' => 4,
+		'Consumer Admin' => 16,
+		'Manufacturer Admin' => 64);
+}
+
 /* To save the extra profile of company code
  * Also note the two add_action functions. Similar to above one of them applies to your own profile page, and the other to everyone elses.
  */
-add_action( 'personal_options_update', 'save_company_id_in_profile' );
-add_action( 'edit_user_profile_update', 'save_company_id_in_profile' );
-function save_company_id_in_profile( $user_id ) {
+add_action( 'personal_options_update', 'save_extra_in_profile' );
+add_action( 'edit_user_profile_update', 'save_extra_in_profile' );
+function save_extra_in_profile( $user_id ) {
  
     if ( !current_user_can( 'edit_user', $user_id ) )
         return false;
  
     //update_usermeta( absint( $user_id ), 'company_id', wp_kses_post( $_POST['companyID'] ) );
     $company_id = wp_kses_post( $_POST['companyID'] );
+    $user_type = wp_kses_post( $_POST['dpl_user_type'] );
+
     error_log('company id when saving is: ' . $company_id);
+    error_log('user type when saving is: ' . $user_type);
 }
 
 /*
