@@ -452,8 +452,15 @@ add_filter( 'contextual_help', 'remove_help', 999, 3 );
  */
 add_action( 'show_user_profile', 'show_extra_in_profile' );
 add_action( 'edit_user_profile', 'show_extra_in_profile' );
-function show_extra_in_profile( $user ) { ?>
- 
+function show_extra_in_profile( $user ) { 
+	global $wpapi;
+	//$user_info = get_userdata($user->ID);
+	//if (!$user_info)
+	//	return false;
+	$ioUser = $wpapi->get_user('user_login', $user->user_login);
+	if (!$ioUser)
+		return false;
+	?>
     <h3>Extra profile information</h3>
  
     <table class="form-table">
@@ -462,20 +469,45 @@ function show_extra_in_profile( $user ) { ?>
             <th><label>Comapny ID</label></th>
  
             <td>
-                <input type="text" name="companyID" id="companyID" value="<?php echo esc_attr( get_the_author_meta( 'company_id', $user->ID ) ); ?>" class="regular-text" /><br />
-                <span class="description">Please set I/O Controls Company ID.</span>
-            </td>
+        		<select name="dpl_company_id" id="dpl_company_id">
+	        	<?php
+				    $company_id_selected = $ioUser->CompanyId;
+				    $ulist = get_the_author_meta( 'company_id', $user->ID );
+		 			foreach ( $ulist as $key => $value ) {
+		 				if ($value == $company_id_selected) {
+		 				?>
+							<option selected="selected" value=<?php echo $value; ?>><?php echo $key; ?></option>
+						<?php
+		 				}
+		 				else {
+		 				?>
+							<option value=<?php echo $value; ?>><?php echo $key; ?></option>
+						<?php
+		 				}
+					}
+				?>
+				</select><br/>
+				<span class="description">Please set I/O Controls Company ID.</span>
+        	</td>
         </tr>
         <tr>
-        	<th><label>Role Type</label></th>
+        	<th><label>User Type</label></th>
         	<td>
         		<select name="dpl_user_type" id="dpl_user_type">
 	        	<?php
-	        		$ulist = get_the_author_meta( 'user_type', $user->ID );
+				    $user_type_selected = $ioUser->UserType;
+				    $ulist = get_the_author_meta( 'user_type', $user->ID );
 		 			foreach ( $ulist as $key => $value ) {
-				?>
-					<option value=<?php echo $value; ?>><?php echo $key; ?></option>
-				<?php
+		 				if ($value == $user_type_selected) {
+		 				?>
+							<option selected="selected" value=<?php echo $value; ?>><?php echo $key; ?></option>
+						<?php
+		 				}
+		 				else {
+		 				?>
+							<option value=<?php echo $value; ?>><?php echo $key; ?></option>
+						<?php
+		 				}
 					}
 				?>
 				</select><br/>
@@ -489,13 +521,12 @@ function show_extra_in_profile( $user ) { ?>
 /*
  * Get company id from other external resouce
  */
-add_filter( 'get_the_author_company_id', 'get_user_company_id', 999, 3 );
-function get_user_company_id($value, $user_id, $original_user_id){
-	error_log('get_user_company_id filter');
-	error_log('value: ' . $value);
-	error_log('user_id: ' . $user_id);
-	error_log('original_user_id: ' . $original_user_id);
-    return 2;
+add_filter( 'get_the_author_company_id', 'get_user_company_list', 999, 3 );
+function get_user_company_list($value, $user_id, $original_user_id){
+		return array (
+		'IO' => 2,
+		'Transit' => 4,
+		'Builder' => 8);
 }
 
 /*
@@ -515,16 +546,24 @@ function get_user_type_list($value, $user_id, $original_user_id){
 add_action( 'personal_options_update', 'save_extra_in_profile' );
 add_action( 'edit_user_profile_update', 'save_extra_in_profile' );
 function save_extra_in_profile( $user_id ) {
- 
+ 	global $wpapi;
+
     if ( !current_user_can( 'edit_user', $user_id ) )
         return false;
  
     //update_usermeta( absint( $user_id ), 'company_id', wp_kses_post( $_POST['companyID'] ) );
-    $company_id = wp_kses_post( $_POST['companyID'] );
+    $company_id = wp_kses_post( $_POST['dpl_company_id'] );
     $user_type = wp_kses_post( $_POST['dpl_user_type'] );
 
-    error_log('company id when saving is: ' . $company_id);
-    error_log('user type when saving is: ' . $user_type);
+    $user_info = get_userdata($user_id);
+    if (!$user_info)
+    	return false;
+    $ioUser = $wpapi->get_user('user_login', $user_info->user_login);
+    if (!$ioUser)
+    	return false;
+    $ioUser->CompanyId = $company_id;
+    $ioUser->UserType = $user_type;
+    return $wpapi->update_io_user($ioUser);
 }
 
 /*
