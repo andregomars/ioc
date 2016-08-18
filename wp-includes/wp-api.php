@@ -24,6 +24,18 @@ class wpapi {
 		return $errors;
 	}
 
+	//return hashed password
+	public function get_hashed_pass($password) {
+		$url = CORE_API_URL . 'Cipher/HashPassword/' . $password;
+
+		$response = wp_remote_get( $url );
+		$body = wp_remote_retrieve_body( $response );
+		if( $body ) 
+			return json_decode($body);
+		else
+			return "*";
+	}
+
 	//return io user
 	public function get_user($field, $value) {
 		$url = CORE_API_URL;

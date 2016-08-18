@@ -10,7 +10,7 @@ using System.IO;
 
 public partial class _Default : System.Web.UI.Page
 {
-    const string IOC_LOGGED_IN_COOKIE = "ioc_looggedin";
+    const string IOC_LOGGED_IN_COOKIE = "ioc_loggedin";
     const string Base_API_URI = "http://localhost:52432/";
 
     protected void Page_Load(object sender, EventArgs e)
