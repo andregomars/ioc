@@ -16,6 +16,6 @@ ToDo:
   ~~intput: user ID~~
 
   ~~output -> input of current user validation logic~~
-* company id in user management in wp
-* sync usertype id to roleid
+* ~~company id in user management in wp~~
+* ~~sync usertype id to roleid~~
 * move to target server
