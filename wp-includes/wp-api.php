@@ -36,6 +36,27 @@ class wpapi {
 			return "*";
 	}
 
+	//return company list
+	public function get_all_company_names() {
+		$url = CORE_API_URL . 'IO_Company/';
+
+		$response = wp_remote_get( $url );
+		$body = wp_remote_retrieve_body( $response );
+		if( !$body ) 
+			return array();
+
+		$io_companies = json_decode($body);
+		//$io_companies = $body;
+		$company_names = array();
+		if ($io_companies) {
+			foreach($io_companies as $value) {
+				$company_names[$value->Name] = $value->CompanyId;
+			}
+		}
+		
+		return $company_names;
+	}
+
 	//return io user
 	public function get_user($field, $value) {
 		$url = CORE_API_URL;

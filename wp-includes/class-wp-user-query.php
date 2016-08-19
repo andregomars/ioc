@@ -515,7 +515,7 @@ class WP_User_Query {
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public function query() {
-		global $wpdb, $current_user;
+		global $wpdb, $current_user, $wpapi;
 
 		$qv =& $this->query_vars;
 
@@ -548,32 +548,48 @@ class WP_User_Query {
  * To add filter out unqualified users from  user query list.
  */
 //by andre
-		// if ( 'all_with_meta' == $qv['fields'] ) {
-		// 	cache_users( $this->results );
+		if ( 'all_with_meta' == $qv['fields'] ) {
+			cache_users( $this->results );
 
-		// 	$r = array();
-		// 	foreach ( $this->results as $rid => $userid ) {
-		// 		$u = new WP_User( $userid, '', $qv['blog_id'] );
-		// 		$name = $u->user_login;
-		// 		if ($name != $current_user->user_login) {
-		// 			unset($this->results[$rid]);
-		// 		}
-		// 		else {
-		// 			$r[ $userid ] = $u;
-		// 		}
-		// 	}
+			$r = array();
+			//get io user company id for current user, 
+			//defualt company id is 0 if io user is not found;
+			$current_company_id = 0;
+			$current_io_user = $wpapi->get_user('user_login', $current_user->user_login);
+			if ($current_io_user)
+				$current_company_id = $current_io_user->CompanyId;
 
-		// 	$this->results = $r;
-		// } elseif ( 'all' == $qv['fields'] ) {
-		// 	foreach ( $this->results as $key => $user ) {
-		// 		$this->results[ $key ] = new WP_User( $user, '', $qv['blog_id'] );
-		// 	}
-		// }
+			foreach ( $this->results as $rid => $userid ) {
+				$u = new WP_User( $userid, '', $qv['blog_id'] );
+				$io_user = $wpapi->get_user('user_login', $u->user_login);
+				$user_company_id = 0;
+				if ($io_user)
+					$user_company_id = $io_user->CompanyId;
+				//admin can view all io company users
+				if (current_user_can('administrator')) {
+					$r[ $userid ] = $u;
+				}
+				//regular io company user can only see his own company user
+				elseif ($current_company_id != $user_company_id) {
+					unset($this->results[$rid]);
+				}
+				//ioc users can see other ioc users
+				else {
+					$r[ $userid ] = $u;
+				}
+			}
+
+			$this->results = $r;
+		} elseif ( 'all' == $qv['fields'] ) {
+			foreach ( $this->results as $key => $user ) {
+				$this->results[ $key ] = new WP_User( $user, '', $qv['blog_id'] );
+			}
+		}
 //by andre end
 
 
 // Original
-
+/*
 		if ( 'all_with_meta' == $qv['fields'] ) {
 			cache_users( $this->results );
 
@@ -587,7 +603,8 @@ class WP_User_Query {
 				$this->results[ $key ] = new WP_User( $user, '', $qv['blog_id'] );
 			}
 		}
-
+*/
+// Original end
 	}
 
 	/**

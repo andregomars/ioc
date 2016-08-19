@@ -123,10 +123,13 @@ class PLL_Admin_Filters extends PLL_Filters {
 			</tr>',
 			__( 'Admin language', 'polylang' ),
 			$dropdown->walk(
-				array_merge(
-					array( (object) array( 'locale' => 0, 'name' => __( 'WordPress default', 'polylang' ) ) ),
-					$this->model->get_languages_list()
-				),
+			//by andre
+				// array_merge(
+				// 	array( (object) array( 'locale' => 0, 'name' => __( 'WordPress default', 'polylang' ) ) ),
+				// 	$this->model->get_languages_list()
+				// ),
+				$this->model->get_languages_list(),
+			//by andre end
 				array(
 					'name'        => 'user_lang',
 					'value'       => 'locale',

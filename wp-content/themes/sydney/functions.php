@@ -523,10 +523,8 @@ function show_extra_in_profile( $user ) {
  */
 add_filter( 'get_the_author_company_id', 'get_user_company_list', 999, 3 );
 function get_user_company_list($value, $user_id, $original_user_id){
-		return array (
-		'IO' => 2,
-		'Transit' => 4,
-		'Builder' => 8);
+	global $wpapi;
+	return $wpapi->get_all_company_names();
 }
 
 /*
@@ -569,20 +567,33 @@ function save_extra_in_profile( $user_id ) {
 /*
  * add Company ID column header in user list
  */
-add_filter('manage_users_columns', 'add_users_column_company_id');
-function add_users_column_company_id($columns) {
-    $columns['company_id'] = 'Company ID';
+add_filter('manage_users_columns', 'add_extra_users_column');
+function add_extra_users_column($columns) {
+    $columns['company_name'] = 'Company';
     return $columns;
 }
 
 /*
  * fill company ID column values in user list
  */
-add_action('manage_users_custom_column',  'manage_users_column_company_id', 10, 3);
-function manage_users_column_company_id($value, $column_name, $user_id) {
-	if ( 'company_id' == $column_name )
-		return "22";
-		//return $value . '<br/>'. get_user_meta('city', $user_id);
+add_action('manage_users_custom_column',  'manage_extra_users_column', 10, 3);
+function manage_extra_users_column($value, $column_name, $user_id) {
+	global $wpapi;
+
+	if ( 'company_name' == $column_name ) {
+		$dict_company = get_user_company_list($value, $user_id, $user_id);
+		$user = get_user_by('ID', $user_id);
+		$io_user = $wpapi->get_user('user_login', $user->user_login);
+		if(!$dict_company || !$io_user)
+			return '';
+		foreach ($dict_company as $key=>$value) {
+			if ($value == $io_user->CompanyId)
+				return $key;
+		}
+
+	}
+
+	//return $value . '<br/>'. get_user_meta('city', $user_id);
 }
 
 //add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
