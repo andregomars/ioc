@@ -458,7 +458,7 @@ function show_extra_in_profile( $user ) {
 	//if (!$user_info)
 	//	return false;
 	$ioUser = $wpapi->get_user('user_login', $user->user_login);
-	if (!$ioUser)
+	if (!$ioUser || !current_user_can('administrator'))
 		return false;
 	?>
     <h3>Extra profile information</h3>
@@ -596,68 +596,29 @@ function manage_extra_users_column($value, $column_name, $user_id) {
 	//return $value . '<br/>'. get_user_meta('city', $user_id);
 }
 
-//add_filter( 'authenticate', 'wpapi_auth', 10, 3 );
-function wpapi_auth( $user, $username, $password) {
-	global $wpapi;
+/*
+ * set profile picture description to empty
+ */
+add_filter('user_profile_picture_description', 'set_profile_avartar_desc');
+function set_profile_avartar_desc($description) {
+    return '';
+}
 
-	if ( $user instanceof WP_User ) {
-		return $user;
-	}
+/*
+ * pre get header image
+ */
+add_filter('get_avatar_url', 'get_header_image_url', 999, 3);
+function get_header_image_url($url, $id_or_email, $args) {
+    global $wpapi;
 
-	if ( empty($username) || empty($password) ) {
-		if ( is_wp_error( $user ) )
-			return $user;
-
-		$error = new WP_Error();
-
-		if ( empty($username) )
-			$error->add('empty_username', __('<strong>ERROR</strong>: The username field is empty.'));
-
-		if ( empty($password) )
-			$error->add('empty_password', __('<strong>ERROR</strong>: The password field is empty.'));
-
-		return $error;
-	}
-	
-	//comment next 4 lines once wapi doesn't work, fall back to wp native auth methods
-	// remove_action('authenticate', 'wp_authenticate_username_password', 20);
-	// remove_action('authenticate', 'wp_authenticate_email_password', 20);
-	// remove_action('authenticate', 'wp_authenticate_spam_check', 99);
-	// remove_action('authenticate', 'wp_authenticate_cookie', 30);
-
-    $user = $wpapi->get_wpuser('user_login', $username);
-
-	if ( !$user ) {
-		return new WP_Error( 'invalid_username',
-			__( '<strong>ERROR</strong>: Invalid username.' ) .
-			' <a href="' . wp_lostpassword_url() . '">' .
-			__( 'Lost your password?' ) .
-			'</a>'
-		);
-	}
-
-	if ( is_wp_error( $user ) ) {
-		return $user;
-	}
-
-// error_log('password: '.$password);
-// error_log('user_pass: '.$user->user_pass);
-// error_log('user: '.print_r($user,1));
-
-	if ( ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
-		return new WP_Error( 'incorrect_password',
-			sprintf(
-				/* translators: %s: user name */
-				__( '<strong>ERROR</strong>: The password you entered for the username %s is incorrect.' ),
-				'<strong>' . $username . '</strong>'
-			) .
-			' <a href="' . wp_lostpassword_url() . '">' .
-			__( 'Lost your password?' ) .
-			'</a>'
-		);
-	}
-
-	return $user;
+    $user = get_user_by('ID', $id_or_email);
+    if (!$user) 
+    	return null;
+    $io_user = $wpapi->get_user('user_login', $user->user_login);
+    if (!$io_user || !$io_user->HeadImage || empty($io_user->HeadImage))
+    	return null;
+    
+    return HEAD_IMAGE_URL . trim($io_user->HeadImage). '.jpg';
 }
 
 
