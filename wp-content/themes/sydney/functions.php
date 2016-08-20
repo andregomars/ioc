@@ -654,7 +654,7 @@ function manage_extra_users_column($value, $column_name, $user_id) {
 			return '';
 		foreach ($dict_company as $key=>$value) {
 			if ($value == $io_user->CompanyId) {
-				if (is_null($value))
+				if (!$value)
 					return '';
 				else 
 					return $key;
