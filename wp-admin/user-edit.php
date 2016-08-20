@@ -225,15 +225,22 @@ if ( ! IS_PROFILE_PAGE ) {
 <input type="hidden" name="checkuser_id" value="<?php echo get_current_user_id(); ?>" />
 </p>
 
+<?php 
+	//by andre
+	if (false) {
+?>
+
 <h2><?php _e( 'Personal Options' ); ?></h2>
 
 <table class="form-table">
+
 <?php if ( ! ( IS_PROFILE_PAGE && ! $user_can_edit ) ) : ?>
 	<tr class="user-rich-editing-wrap">
 		<th scope="row"><?php _e( 'Visual Editor' ); ?></th>
 		<td><label for="rich_editing"><input name="rich_editing" type="checkbox" id="rich_editing" value="false" <?php if ( ! empty( $profileuser->rich_editing ) ) checked( 'false', $profileuser->rich_editing ); ?> /> <?php _e( 'Disable the visual editor when writing' ); ?></label></td>
 	</tr>
 <?php endif; ?>
+
 <?php if ( count($_wp_admin_css_colors) > 1 && has_action('admin_color_scheme_picker') ) : ?>
 <tr class="user-admin-color-wrap">
 <th scope="row"><?php _e('Admin Color Scheme')?></th>
@@ -281,6 +288,12 @@ do_action( 'personal_options', $profileuser );
 ?>
 
 </table>
+
+<?php 
+	}
+	//by andre end
+?>
+
 <?php
 	if ( IS_PROFILE_PAGE ) {
 		/**
@@ -387,7 +400,7 @@ if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_c
 </tr>
 </table>
 
-<h2><?php _e( 'Contact Info' ); ?></h2>
+<h2><?php _e( 'More Info' ); ?></h2>
 
 <table class="form-table">
 <tr class="user-email-wrap">
@@ -445,14 +458,29 @@ if ( is_multisite() && is_network_admin() && ! IS_PROFILE_PAGE && current_user_c
 ?>
 </table>
 
+<?php 
+	//by andre
+	if (false) {
+?>
 <h2><?php IS_PROFILE_PAGE ? _e( 'About Yourself' ) : _e( 'About the user' ); ?></h2>
+<?php
+	}
+?>
 
 <table class="form-table">
+
+<?php 
+	//by andre
+	if (false) {
+?>
 <tr class="user-description-wrap">
 	<th><label for="description"><?php _e('Biographical Info'); ?></label></th>
 	<td><textarea name="description" id="description" rows="5" cols="30"><?php echo $profileuser->description; // textarea_escaped ?></textarea>
 	<p class="description"><?php _e('Share a little biographical information to fill out your profile. This may be shown publicly.'); ?></p></td>
 </tr>
+<?php
+	}
+?>
 
 <?php if ( get_option( 'show_avatars' ) ) : ?>
 <tr class="user-profile-picture">

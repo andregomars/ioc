@@ -47,7 +47,7 @@ class wpapi {
 
 		$io_companies = json_decode($body);
 		//$io_companies = $body;
-		$company_names = array();
+		$company_names = array('-- Please select --' => 0);
 		if ($io_companies) {
 			foreach($io_companies as $value) {
 				$company_names[$value->Name] = $value->CompanyId;
@@ -98,7 +98,7 @@ class wpapi {
 			'Email' => $data['user_email'],
 			'Mobile' => null,
 			'CreateTime' => date('c'),
-			'LastTime' => date('c'),
+			'LastTime' => null,
 			'ValidDate' => date('c'),
 			'UserType' => null,
 			'HeadImage' => null,

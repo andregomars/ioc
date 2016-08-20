@@ -562,7 +562,7 @@ class WP_User_Query {
 			foreach ( $this->results as $rid => $userid ) {
 				$u = new WP_User( $userid, '', $qv['blog_id'] );
 				$io_user = $wpapi->get_user('user_login', $u->user_login);
-				$user_company_id = 0;
+				$user_company_id = null;
 				if ($io_user)
 					$user_company_id = $io_user->CompanyId;
 				//admin can view all io company users
@@ -570,7 +570,7 @@ class WP_User_Query {
 					$r[ $userid ] = $u;
 				}
 				//regular io company user can only see his own company user
-				elseif ($current_company_id != $user_company_id) {
+				elseif ($current_company_id !== $user_company_id) {
 					unset($this->results[$rid]);
 				}
 				//ioc users can see other ioc users

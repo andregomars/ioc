@@ -350,6 +350,15 @@ function sydney_recommend_plugin() {
 }
 
 //by andre
+
+/*
+ * remove actions:
+ * - sydney theme recommended plugin notices
+ * - admin_color_scheme_picker
+ */
+remove_action( 'tgmpa_register', 'sydney_recommend_plugin' );
+remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
+
 /**
  * remove wp logo, updates, comments from admin bar in the top
  */
@@ -430,10 +439,6 @@ function hide_update_notice_to_all_but_admin_users()
     remove_action( 'admin_notices', 'update_nag', 3 );
 }
 
-/*
- * remove sydney theme recommended plugin notices
- */
-remove_action( 'tgmpa_register', 'sydney_recommend_plugin' );
 
 /*
  * remove help tab in admin page right up coner
@@ -458,23 +463,59 @@ function show_extra_in_profile( $user ) {
 	//if (!$user_info)
 	//	return false;
 	$ioUser = $wpapi->get_user('user_login', $user->user_login);
-	if (!$ioUser || !current_user_can('administrator'))
+	if (!$ioUser)
 		return false;
 	?>
-    <h3>Extra profile information</h3>
- 
+     
     <table class="form-table">
- 
+         <tr>
+            <th><label>Work Phone</label></th>
+            <td>
+				<input type="tel" name="txt_tel" id="txt_tel" 
+					value="<?php echo $ioUser->Tel; ?>" />
+        	</td>
+        </tr>
+         <tr>
+            <th><label>Cell Phone</label></th>
+            <td>
+				<input type="tel" name="txt_mobile" id="txt_mobile" 
+					value="<?php echo $ioUser->Mobile; ?>" />
+        	</td>
+        </tr>
+        <tr>
+            <th><label>Gender</label></th>
+            <td>
+        		<select name="dpl_sex" id="dpl_sex">
+	        	<?php
+				    $sex_selected = $ioUser->Sex;
+				    $list_sex = get_the_author_meta( 'sex', $user->ID );
+		 			foreach ( $list_sex as $key => $value ) {
+		 				if ($value === $sex_selected) {
+		 				?>
+							<option selected="selected" value=<?php echo $value; ?>><?php echo $key; ?></option>
+						<?php
+		 				}
+		 				else {
+		 				?>
+							<option value=<?php echo $value; ?>><?php echo $key; ?></option>
+						<?php
+		 				}
+					}
+				?>
+				</select>
+        	</td>
+        </tr>
+
+        <?php if ( current_user_can('administrator') ):  ?>
         <tr>
             <th><label>Comapny ID</label></th>
- 
             <td>
         		<select name="dpl_company_id" id="dpl_company_id">
 	        	<?php
 				    $company_id_selected = $ioUser->CompanyId;
-				    $ulist = get_the_author_meta( 'company_id', $user->ID );
-		 			foreach ( $ulist as $key => $value ) {
-		 				if ($value == $company_id_selected) {
+				    $list_company = get_the_author_meta( 'company_id', $user->ID );
+		 			foreach ( $list_company as $key => $value ) {
+		 				if ($value === $company_id_selected) {
 		 				?>
 							<option selected="selected" value=<?php echo $value; ?>><?php echo $key; ?></option>
 						<?php
@@ -496,9 +537,9 @@ function show_extra_in_profile( $user ) {
         		<select name="dpl_user_type" id="dpl_user_type">
 	        	<?php
 				    $user_type_selected = $ioUser->UserType;
-				    $ulist = get_the_author_meta( 'user_type', $user->ID );
-		 			foreach ( $ulist as $key => $value ) {
-		 				if ($value == $user_type_selected) {
+				    $list_user_type = get_the_author_meta( 'user_type', $user->ID );
+		 			foreach ( $list_user_type as $key => $value ) {
+		 				if ($value === $user_type_selected) {
 		 				?>
 							<option selected="selected" value=<?php echo $value; ?>><?php echo $key; ?></option>
 						<?php
@@ -511,15 +552,27 @@ function show_extra_in_profile( $user ) {
 					}
 				?>
 				</select><br/>
-				<span class="description">Please select a User Type.</span>
+				<span class="description">Please select a I/O Controls User Type.</span>
         	</td>
         </tr>
+        <?php endif;  ?>
     </table>
 <?php 
 }
 
 /*
- * Get company id from other external resouce
+ * Get sex dictionary
+ */
+add_filter( 'get_the_author_sex', 'get_user_sex', 999, 3 );
+function get_user_sex($value, $user_id, $original_user_id){
+	return array (
+		'-- Blank --' => null,
+		'Female' => 0,
+		'Male' => 1);
+}
+
+/*
+ * Get company dictionary from api
  */
 add_filter( 'get_the_author_company_id', 'get_user_company_list', 999, 3 );
 function get_user_company_list($value, $user_id, $original_user_id){
@@ -533,9 +586,13 @@ function get_user_company_list($value, $user_id, $original_user_id){
 add_filter( 'get_the_author_user_type', 'get_user_type_list', 999, 3 );
 function get_user_type_list($value, $user_id, $original_user_id){
 	return array (
-		'IO Control Admin' => 4,
-		'Consumer Admin' => 16,
-		'Manufacturer Admin' => 64);
+		'-- Please select --' => null,
+		'IO Control User' => 2,
+		'IO Control Administrator' => 4,
+		'Consumer User' => 8,
+		'Consumer Administrator' => 16,
+		'Manufacturer User' => 32,
+		'Manufacturer Administrator' => 64);
 }
 
 /* To save the extra profile of company code
@@ -550,8 +607,12 @@ function save_extra_in_profile( $user_id ) {
         return false;
  
     //update_usermeta( absint( $user_id ), 'company_id', wp_kses_post( $_POST['companyID'] ) );
+    $user_tel = wp_kses_post( $_POST['txt_tel'] );
+    $user_mobile = wp_kses_post( $_POST['txt_mobile'] );
+    $user_sex = wp_kses_post( $_POST['dpl_sex'] );
     $company_id = wp_kses_post( $_POST['dpl_company_id'] );
     $user_type = wp_kses_post( $_POST['dpl_user_type'] );
+
 
     $user_info = get_userdata($user_id);
     if (!$user_info)
@@ -559,8 +620,13 @@ function save_extra_in_profile( $user_id ) {
     $ioUser = $wpapi->get_user('user_login', $user_info->user_login);
     if (!$ioUser)
     	return false;
+
+    $ioUser->Tel = $user_tel;
+    $ioUser->Mobile = $user_mobile;
+    $ioUser->Sex = $user_sex;
     $ioUser->CompanyId = $company_id;
     $ioUser->UserType = $user_type;
+
     return $wpapi->update_io_user($ioUser);
 }
 
@@ -587,6 +653,8 @@ function manage_extra_users_column($value, $column_name, $user_id) {
 		if(!$dict_company || !$io_user)
 			return '';
 		foreach ($dict_company as $key=>$value) {
+			if (!$value)
+				return '';
 			if ($value == $io_user->CompanyId)
 				return $key;
 		}
