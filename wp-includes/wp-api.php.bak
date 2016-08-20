@@ -24,48 +24,15 @@ class wpapi {
 		return $errors;
 	}
 
-	//return hashed password
-	public function get_hashed_pass($password) {
-		$url = CORE_API_URL . 'Cipher/HashPassword/' . $password;
-
-		$response = wp_remote_get( $url );
-		$body = wp_remote_retrieve_body( $response );
-		if( $body ) 
-			return json_decode($body);
-		else
-			return "*";
-	}
-
-	//return company list
-	public function get_all_company_names() {
-		$url = CORE_API_URL . 'IO_Company/';
-
-		$response = wp_remote_get( $url );
-		$body = wp_remote_retrieve_body( $response );
-		if( !$body ) 
-			return array();
-
-		$io_companies = json_decode($body);
-		//$io_companies = $body;
-		$company_names = array('-- Please select --' => 0);
-		if ($io_companies) {
-			foreach($io_companies as $value) {
-				$company_names[$value->Name] = $value->CompanyId;
-			}
-		}
-		
-		return $company_names;
-	}
-
-	//return io user
+	//return core user
 	public function get_user($field, $value) {
 		$url = CORE_API_URL;
 		switch( $field ) {
 			case "ID":
-				$url = $url . 'IO_Users/' . $value;
+				$url = $url . 'User/' . $value;
 				break;
 			case "user_login":
-				$url = $url . 'IO_Users?loginName='.$value;
+				$url = $url . 'User?loginName='.$value;
 				break;
 			case "email":
 				break;
@@ -83,28 +50,26 @@ class wpapi {
 
 	//return: user ID
 	public function insert_user($data) {
+		global $current_user;
+
 		if ( !$data )
 			return 0;
 		
 		//update user basic info in db by user table id
-		$url_user = CORE_API_URL . 'IO_Users/';
+		$url_user = CORE_API_URL . 'User/';
 		$user_new = array (
-			'CompanyId' => 0,
-			'Name' => $data['display_name'],
-			'LogName' => $data['user_login'],
-			'Sex' => null,
-			'Pwd' => $data['user_pass'],
-			'Tel' => null,
+			'LoginName' => $data['user_login'],
+			'Password' => $data['user_pass'],
 			'Email' => $data['user_email'],
-			'Mobile' => null,
-			'CreateTime' => date('c'),
-			'LastTime' => null,
+			'Name' => $data['display_name'],
+			'UserType' => 4,
+			'CompanyID' => 21,
 			'ValidDate' => date('c'),
-			'UserType' => null,
-			'HeadImage' => null,
 			'IsActive' => 1,
+			'InDate' => date('c'),
+			'InUser' => $current_user->user_login,
 			'Status' => 0 );
-
+		
 		$options = array(
 			'headers' => array(
 				'Content-Type' => 'text/json'
@@ -118,24 +83,27 @@ class wpapi {
 		} 
 
 		$responseBody = wp_remote_retrieve_body( $response_insert_user );
-		$user_id = json_decode($responseBody)->UserId;
+		$user_id = json_decode($responseBody)->ID;
 
 		return $user_id;
 	}
 
 	//return: boolean
 	public function update_user($user_login, $data) {
+		global $current_user;
+
 		if ( empty($user_login) || !$data )
 			return false;
 		
 		//fetch user id
-		$ioUser = $this->get_user('user_login', $user_login);
-		if ( !$ioUser)
-			return false;		
-		$user_id = $ioUser->UserId;
+		$iocUser = $this->get_user('user_login', $user_login);
+		$user_id = $iocUser->ID;
+
+		if ( !$user_id || $user_id < 1 )
+			return false;
 
 		//get user object from api
-		$url_user = CORE_API_URL . 'IO_Users/' . $user_id;
+		$url_user = CORE_API_URL . 'User/' . $user_id;
 		$request_get_user = wp_remote_get( $url_user );
 		$response_get_user = wp_remote_retrieve_body( $request_get_user );
 		if( !$response_get_user )
@@ -143,10 +111,11 @@ class wpapi {
 		$user_update = json_decode($response_get_user, true);
 
 		//update user basic info in db by user table id
-		$user_update['Pwd'] = $data['user_pass'];
+		$user_update['Password'] = $data['user_pass'];
 		$user_update['Email'] = $data['user_email'];
 		$user_update['Name'] = $data['display_name'];
-		$user_update['LastTime'] = date('c');
+		$user_update['EditDate'] = date('c');
+		$user_update['EditUser'] = $current_user->user_login;
 
 		$options = array(
 			'headers' => array(
@@ -169,9 +138,9 @@ class wpapi {
 
 		//fetch user id
 		$user = $this->get_user('user_login', $user_login);
-		if ( !$user )
+		$user_id = $user->ID;
+		if ( !$user_id || $user_id < 1 )
 			return false;
-		$user_id = $user->UserId;
 
 		//get all userRole IDs of the user
 		$request_get_userRole = wp_remote_get( $url_userRole );
@@ -239,15 +208,15 @@ class wpapi {
 	public function delete_user($user_login) {
 		//fetch user id
 		$user = $this->get_user('user_login', $user_login);
-		if ( !$user )
+		$user_id = $user->ID;
+		if ( !$user_id || $user_id < 1 )
 			return false;
-		$user_id = $user->UserId;
 		
 		//delete user role relationship
 		$this->update_user_caps($user_login, array());
 
 		//delete user through api
-		$url_user = CORE_API_URL . 'IO_Users/' . $user_id;
+		$url_user = CORE_API_URL . 'User/' . $user_id;
 		$response_delete_user = wp_remote_delete( $url_user );
 		if ( is_wp_error( $response_delete_user ) || !$response_delete_user ) {
 			return false;
@@ -369,25 +338,82 @@ class wpapi {
 		return true;
 	}
 
-	//return: boolean
-	public function update_io_user($io_user) {
-		if ( !$io_user )
-			return false;
-	
-		$user_id = $io_user->UserId;
-		$url_user = CORE_API_URL . 'IO_Users/' . $user_id;
+/*
 
-		$options = array(
-			'headers' => array(
-				'Content-Type' => 'text/json'
-			),
-			'body'	=> json_encode($io_user)
-		);
 
-		$response_update_user = wp_remote_put( $url_user, $options );
-		if ( is_wp_error( $response_update_user ) || !$response_update_user ) {
-			return false;
-		} 
+	public function get_all_roles() {
+		$rolesJSON = null;
+		$url = CORE_API_URL . 'IOCRolesAll';
+		$request = wp_remote_get( "$url" );
+		$response = wp_remote_retrieve_body( $request );
+		if( $response ) 
+			$rolesJSON = json_decode($response, true);
+
+		return $rolesJSON;
 	}
+
+	public function get_counted_users() {
+		//$val = 'a:2:{s:11:"total_users";i:4;s:11:"avail_roles";a:4:{s:13:"administrator";i:2;s:6:"editor";i:1;s:10:"subscriber";i:1;s:4:"none";i:0;}}';
+		$valJSON = '{"total_users":4,"avail_roles":{"administrator":2,"editor":1,"subscriber":1,"none":0}}'; 
+		return json_decode($valJSON, true);
+	}
+
+	public static function get_ioc_user($field, $value) {
+		$userJSON = null;
+		$url = "";
+		switch( $field ) {
+			case "ID":
+				$url = "http://localhost:52432/api/IOCUser/".$value;
+				break;
+			case "user_login":
+				$url = "http://localhost:52432/api/IOCUser?loginName=".$value;
+				break;
+			case "email":
+				break;
+			default:
+				break;
+		}
+		
+		$request = wp_remote_get( $url );
+		$response = wp_remote_retrieve_body( $request );
+		if( $response ) 
+			$userJSON = json_decode($response, true);
+
+		return (object)$userJSON;
+	}
+
+	public static function get_wpuser($field, $value) {
+		$wpuser = new WP_User();
+
+		$wpuserJSON = null;
+		$url = "";
+		switch( $field ) {
+			case "ID":
+				$url = "http://localhost:52432/api/IOCUserInfo/".$value;
+				break;
+			case "user_login":
+				$url = "http://localhost:52432/api/IOCUserInfo?loginName=".$value;
+				break;
+			default:
+				break;
+		}
+
+		$request = wp_remote_get( $url );
+		$response = wp_remote_retrieve_body( $request );
+		if( !$response )
+			return null;
+
+		$wpuserJSON = (object)json_decode($response, true);
+		$wpuser->ID = $wpuserJSON->ID;
+		$wpuser->cap_key = $wpuserJSON->cap_key;
+		$wpuser->caps = $wpuserJSON->caps;
+		$wpuser->data = (object)$wpuserJSON->data;
+		$wpuser->filter = $wpuserJSON->filter;
+		$wpuser->roles = $wpuserJSON->roles;
+		$wpuser->allcaps = $wpuserJSON->allcaps;
+
+		return $wpuser;
+	}
+*/
 
 }

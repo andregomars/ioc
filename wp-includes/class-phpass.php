@@ -222,25 +222,26 @@ class PasswordHash {
 		return $output;
 	}
 
-	function HashPassword($password)
-	{
+	function hash_password($password) {
+		global $wpapi;
+
 		if ( strlen( $password ) > 4096 ) {
 			return '*';
 		}
 
-		$hash = md5(md5(md5($password)));
-
-		return $hash;
+		//$hash = md5(md5(md5($password)));
+		return $wpapi->get_hashed_pass($password);
 	}
 
-	function CheckPassword($password, $stored_hash)
-	{
+	function check_password($password, $stored_hash) {
+		global $wpapi;
+
 		if ( strlen( $password ) > 4096 ) {
 			return false;
 		}
 
-		$hash = md5(md5(md5($password)));
-
+		//$hash = md5(md5(md5($password)));
+		$hash = $wpapi->get_hashed_pass($password);
 		return $hash === $stored_hash;
 	}
 }

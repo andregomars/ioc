@@ -2033,7 +2033,7 @@ function wp_hash_password($password) {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	return $wp_hasher->HashPassword( trim( $password ) );
+	return $wp_hasher->hash_password( trim( $password ) );
 }
 endif;
 
@@ -2063,28 +2063,6 @@ if ( !function_exists('wp_check_password') ) :
 function wp_check_password($password, $hash, $user_id = '') {
 	global $wp_hasher;
 
-	// If the hash is still md5...
-	if ( strlen($hash) <= 32 ) {
-		$check = hash_equals( $hash, md5(md5(md5( $password ))) );
-		if ( $check && $user_id ) {
-			// Rehash using new hash.
-			wp_set_password($password, $user_id);
-			$hash = wp_hash_password($password);
-		}
-
-		/**
-		 * Filter whether the plaintext password matches the encrypted password.
-		 *
-		 * @since 2.5.0
-		 *
-		 * @param bool       $check    Whether the passwords match.
-		 * @param string     $password The plaintext password.
-		 * @param string     $hash     The hashed password.
-		 * @param string|int $user_id  User ID. Can be empty.
-		 */
-		return apply_filters( 'check_password', $check, $password, $hash, $user_id );
-	}
-
 	// If the stored hash is longer than an MD5, presume the
 	// new style phpass portable hash.
 	if ( empty($wp_hasher) ) {
@@ -2093,7 +2071,7 @@ function wp_check_password($password, $hash, $user_id = '') {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	$check = $wp_hasher->CheckPassword($password, $hash);
+	$check = $wp_hasher->check_password($password, $hash);
 
 	/** This filter is documented in wp-includes/pluggable.php */
 	return apply_filters( 'check_password', $check, $password, $hash, $user_id );
