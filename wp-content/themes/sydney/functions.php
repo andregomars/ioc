@@ -653,10 +653,12 @@ function manage_extra_users_column($value, $column_name, $user_id) {
 		if(!$dict_company || !$io_user)
 			return '';
 		foreach ($dict_company as $key=>$value) {
-			if (!$value)
-				return '';
-			if ($value == $io_user->CompanyId)
-				return $key;
+			if ($value == $io_user->CompanyId) {
+				if (is_null($value))
+					return '';
+				else 
+					return $key;
+			}
 		}
 
 	}
