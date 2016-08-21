@@ -21,4 +21,5 @@ ToDo:
 * add default company code under current user company id
 * remove wp setting from admin menu, except admin
 * backup existing ioform.cs
+* browser compatability
 * move to target server
