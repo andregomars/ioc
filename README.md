@@ -18,4 +18,7 @@ ToDo:
   ~~output -> input of current user validation logic~~
 * ~~company id in user management in wp~~
 * ~~sync usertype id to roleid~~
+* add default company code under current user company id
+* remove wp setting from admin menu, except admin
+* backup existing ioform.cs
 * move to target server
