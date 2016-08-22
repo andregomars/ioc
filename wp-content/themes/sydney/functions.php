@@ -610,8 +610,12 @@ function save_extra_in_profile( $user_id ) {
     $user_tel = wp_kses_post( $_POST['txt_tel'] );
     $user_mobile = wp_kses_post( $_POST['txt_mobile'] );
     $user_sex = wp_kses_post( $_POST['dpl_sex'] );
-    $company_id = wp_kses_post( $_POST['dpl_company_id'] );
-    $user_type = wp_kses_post( $_POST['dpl_user_type'] );
+    $company_id = null;
+    if ( !empty($_POST['dpl_company_id']) ) 
+    	$company_id = wp_kses_post( $_POST['dpl_company_id'] );
+    $user_type = null;
+    if ( !empty($_POST['dpl_user_type']) )
+    	$user_type = wp_kses_post( $_POST['dpl_user_type'] );
 
 
     $user_info = get_userdata($user_id);
@@ -624,8 +628,10 @@ function save_extra_in_profile( $user_id ) {
     $ioUser->Tel = $user_tel;
     $ioUser->Mobile = $user_mobile;
     $ioUser->Sex = $user_sex;
-    $ioUser->CompanyId = $company_id;
-    $ioUser->UserType = $user_type;
+    if ( !is_null($company_id) )
+    	$ioUser->CompanyId = $company_id;
+    if ( !is_null($user_type) )
+    	$ioUser->UserType = $user_type;
 
     return $wpapi->update_io_user($ioUser);
 }
