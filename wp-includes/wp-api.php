@@ -81,17 +81,24 @@ class wpapi {
 			return null;
 	}
 
-	//return: user ID
+	//return: void
 	public function insert_user($editor, $data) {
 		if ( !$data )
 			return 0;
 
+		$user_login = $data['user_login'];
+		$io_user = $this->get_user('user_login', $user_login);
+		if ( $io_user ) {
+			$this->update_user($user_login, $data);
+			return;
+		}
+
 		//set user company id the same as the editor's
 		$company_id = 0;
 		if ( $editor ) {
-			$io_user = $this->get_user('user_login', $editor->user_login);
-			if ( $io_user )
-				$company_id = $io_user->CompanyId;
+			$io_editor = $this->get_user('user_login', $editor->user_login);
+			if ( $io_editor )
+				$company_id = $io_editor->CompanyId;
 		}
 
 		//update user basic info in db by user table id
@@ -99,7 +106,7 @@ class wpapi {
 		$user_new = array (
 			'CompanyId' => $company_id,
 			'Name' => $data['display_name'],
-			'LogName' => $data['user_login'],
+			'LogName' => $user_login,
 			'Sex' => null,
 			'Pwd' => $data['user_pass'],
 			'Tel' => null,
@@ -126,9 +133,6 @@ class wpapi {
 		} 
 
 		$responseBody = wp_remote_retrieve_body( $response_insert_user );
-		$user_id = json_decode($responseBody)->UserId;
-
-		return $user_id;
 	}
 
 	//return: boolean
@@ -167,6 +171,8 @@ class wpapi {
 		if ( is_wp_error( $response_update_user ) || !$response_update_user ) {
 			return false;
 		} 
+
+		return true;
 	}
 
 	//return: boolean
@@ -396,6 +402,8 @@ class wpapi {
 		if ( is_wp_error( $response_update_user ) || !$response_update_user ) {
 			return false;
 		} 
+
+		return true;
 	}
 
 }
