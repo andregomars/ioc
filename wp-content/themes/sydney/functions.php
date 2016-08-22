@@ -691,5 +691,14 @@ function get_header_image_url($url, $id_or_email, $args) {
     return HEAD_IMAGE_URL . trim($io_user->HeadImage). '.jpg';
 }
 
+/*
+ * remove update count alert from plugins
+ */
+add_filter('wp_get_update_data', 'remove_plugins_count', 999, 3);
+function remove_plugins_count($update_data, $titles) {
+	if ($update_data && $update_data['counts'] && $update_data['counts']['plugins']) 
+		$update_data['counts']['plugins'] = 0;
+	return $update_data;
+}
 
 //by andre end

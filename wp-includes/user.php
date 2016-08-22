@@ -1385,7 +1385,7 @@ function validate_username( $username ) {
  *                      be created.
  */
 function wp_insert_user( $userdata ) {
-	global $wpapi, $wpdb;
+	global $wpapi, $wpdb, $current_user;
 
 	if ( $userdata instanceof stdClass ) {
 		$userdata = get_object_vars( $userdata );
@@ -1617,7 +1617,7 @@ function wp_insert_user( $userdata ) {
 		$wpdb->update( $wpdb->users, $data, compact( 'ID' ) );
 		$user_id = (int) $ID;
 	} else {
-		$wpapi->insert_user($data + compact( 'user_login' ));
+		$wpapi->insert_user($current_user, $data + compact( 'user_login' ));
 		$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
 		$user_id = (int) $wpdb->insert_id;
 	}

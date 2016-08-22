@@ -82,14 +82,22 @@ class wpapi {
 	}
 
 	//return: user ID
-	public function insert_user($data) {
+	public function insert_user($editor, $data) {
 		if ( !$data )
 			return 0;
-		
+
+		//set user company id the same as the editor's
+		$company_id = 0;
+		if ( $editor ) {
+			$io_user = $this->get_user('user_login', $editor->user_login);
+			if ( $io_user )
+				$company_id = $io_user->CompanyId;
+		}
+
 		//update user basic info in db by user table id
 		$url_user = CORE_API_URL . 'IO_Users/';
 		$user_new = array (
-			'CompanyId' => 0,
+			'CompanyId' => $company_id,
 			'Name' => $data['display_name'],
 			'LogName' => $data['user_login'],
 			'Sex' => null,
