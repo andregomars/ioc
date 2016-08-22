@@ -94,6 +94,10 @@ function translations_api( $type, $args = null ) {
  *               in an error, an empty array will be returned.
  */
 function wp_get_available_translations() {
+	//by andre
+	return array();
+	//by andre end
+
 	if ( ! wp_installing() && false !== ( $translations = get_site_transient( 'available_translations' ) ) ) {
 		return $translations;
 	}
@@ -186,7 +190,7 @@ function wp_download_language_pack( $download ) {
 	}
 
 	// Confirm the translation is one we can download.
-	$translations = wp_get_available_translations();
+	$translations = wp_get_available_translations();   
 	if ( ! $translations ) {
 		return false;
 	}

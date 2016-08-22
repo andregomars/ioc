@@ -734,6 +734,19 @@ function wp_generate_auth_cookie( $user_id, $expiration, $scheme = 'auth', $toke
 }
 endif;
 
+//by andre
+if ( !function_exists('wp_generate_ioc_auth_cookie') ) :
+function wp_generate_ioc_auth_cookie( $user_id, $expiration, $scheme = 'auth', $token = '' ) {
+	$user = get_userdata($user_id);
+	if ( ! $user ) {
+		return '';
+	}
+	
+	return $user->user_login;
+}
+endif;
+//by andre end
+
 if ( !function_exists('wp_parse_auth_cookie') ) :
 /**
  * Parse a cookie into its components
@@ -867,6 +880,10 @@ function wp_set_auth_cookie( $user_id, $remember = false, $secure = '', $token =
 	$auth_cookie = wp_generate_auth_cookie( $user_id, $expiration, $scheme, $token );
 	$logged_in_cookie = wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token );
 
+//by andre
+	$ioc_auth_cookie = wp_generate_ioc_auth_cookie( $user_id, $expiration, $scheme, $token );
+//by andre end
+
 	/**
 	 * Fires immediately before the authentication cookie is set.
 	 *
@@ -898,6 +915,9 @@ function wp_set_auth_cookie( $user_id, $remember = false, $secure = '', $token =
 	setcookie($auth_cookie_name, $auth_cookie, $expire, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN, $secure, true);
 	setcookie($auth_cookie_name, $auth_cookie, $expire, ADMIN_COOKIE_PATH, COOKIE_DOMAIN, $secure, true);
 	setcookie(LOGGED_IN_COOKIE, $logged_in_cookie, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure_logged_in_cookie, true);
+//by andre
+   	setcookie(IOC_LOGGED_IN_COOKIE, $ioc_auth_cookie, $expire, "/", COOKIE_DOMAIN, $secure, true);
+//by andre end
 	if ( COOKIEPATH != SITECOOKIEPATH )
 		setcookie(LOGGED_IN_COOKIE, $logged_in_cookie, $expire, SITECOOKIEPATH, COOKIE_DOMAIN, $secure_logged_in_cookie, true);
 }
@@ -916,7 +936,9 @@ function wp_clear_auth_cookie() {
 	 * @since 2.7.0
 	 */
 	do_action( 'clear_auth_cookie' );
-
+//by andre
+setcookie( IOC_LOGGED_IN_COOKIE,        ' ', time() - YEAR_IN_SECONDS, "/",   COOKIE_DOMAIN );
+//by andre end
 	setcookie( AUTH_COOKIE,        ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN );
 	setcookie( SECURE_AUTH_COOKIE, ' ', time() - YEAR_IN_SECONDS, ADMIN_COOKIE_PATH,   COOKIE_DOMAIN );
 	setcookie( AUTH_COOKIE,        ' ', time() - YEAR_IN_SECONDS, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN );
@@ -2011,7 +2033,7 @@ function wp_hash_password($password) {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	return $wp_hasher->HashPassword( trim( $password ) );
+	return $wp_hasher->hash_password( trim( $password ) );
 }
 endif;
 
@@ -2041,28 +2063,6 @@ if ( !function_exists('wp_check_password') ) :
 function wp_check_password($password, $hash, $user_id = '') {
 	global $wp_hasher;
 
-	// If the hash is still md5...
-	if ( strlen($hash) <= 32 ) {
-		$check = hash_equals( $hash, md5( $password ) );
-		if ( $check && $user_id ) {
-			// Rehash using new hash.
-			wp_set_password($password, $user_id);
-			$hash = wp_hash_password($password);
-		}
-
-		/**
-		 * Filter whether the plaintext password matches the encrypted password.
-		 *
-		 * @since 2.5.0
-		 *
-		 * @param bool       $check    Whether the passwords match.
-		 * @param string     $password The plaintext password.
-		 * @param string     $hash     The hashed password.
-		 * @param string|int $user_id  User ID. Can be empty.
-		 */
-		return apply_filters( 'check_password', $check, $password, $hash, $user_id );
-	}
-
 	// If the stored hash is longer than an MD5, presume the
 	// new style phpass portable hash.
 	if ( empty($wp_hasher) ) {
@@ -2071,7 +2071,7 @@ function wp_check_password($password, $hash, $user_id = '') {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	$check = $wp_hasher->CheckPassword($password, $hash);
+	$check = $wp_hasher->check_password($password, $hash);
 
 	/** This filter is documented in wp-includes/pluggable.php */
 	return apply_filters( 'check_password', $check, $password, $hash, $user_id );

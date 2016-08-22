@@ -773,7 +773,17 @@ function delete_user_meta($user_id, $meta_key, $meta_value = '') {
  * @return mixed Will be an array if $single is false. Will be value of meta data field if $single is true.
  */
 function get_user_meta($user_id, $key = '', $single = false) {
-	return get_metadata('user', $user_id, $key, $single);
+	// global $wpapi;
+
+	// $usermeta = null;
+	// if (strpos($key,'capabilities')) 
+	// {
+	// 	$user = new WP_User( $user_id );
+	// 	$caps = $wpapi->get_wpuser('user_login', $user->user_login)->caps;
+	// 	return $caps;
+	// }
+	// else
+		return get_metadata('user', $user_id, $key, $single);
 }
 
 /**
@@ -794,6 +804,14 @@ function get_user_meta($user_id, $key = '', $single = false) {
  * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
  */
 function update_user_meta($user_id, $meta_key, $meta_value, $prev_value = '') {
+	global $wpapi;
+
+	//update user and roles relationship through REST API
+	if (strpos($meta_key,'capabilities')) 
+	{
+		$user = new WP_User( $user_id );
+		$wpapi->update_user_caps($user->user_login, $meta_value);
+	}
 	return update_metadata('user', $user_id, $meta_key, $meta_value, $prev_value);
 }
 
@@ -814,7 +832,7 @@ function update_user_meta($user_id, $meta_key, $meta_value, $prev_value = '') {
  * @return array Includes a grand total and an array of counts indexed by role strings.
  */
 function count_users($strategy = 'time') {
-	global $wpdb;
+	global $wpdb, $wpapi;
 
 	// Initialize
 	$id = get_current_blog_id();
@@ -822,6 +840,7 @@ function count_users($strategy = 'time') {
 	$result = array();
 
 	if ( 'time' == $strategy ) {
+		
 		$avail_roles = wp_roles()->get_names();
 
 		// Build a CPU-intensive query that will return concise information.
@@ -829,15 +848,11 @@ function count_users($strategy = 'time') {
 		foreach ( $avail_roles as $this_role => $name ) {
 			$select_count[] = "(SELECT COUNT(*) FROM $wpdb->usermeta WHERE [meta_key] = '{$blog_prefix}capabilities' AND [meta_value] LIKE '%" . $wpdb->esc_like( $this_role ) . "%') as $this_role";
 		}
+		$select_count[] = "(SELECT COUNT(*) FROM $wpdb->usermeta WHERE [meta_key] = '{$blog_prefix}capabilities' AND [meta_value] = 'a:0:{}') as none";
 		$select_count = implode(', ', $select_count);
 
 		// Add the meta_value index to the selection list, then run the query.
-		$row = $wpdb->get_row( "SELECT $select_count, COUNT(*) FROM $wpdb->usermeta WHERE meta_key = '{$blog_prefix}capabilities'", ARRAY_N );
-		$query = "SELECT $select_count, COUNT(*) AS [all] FROM $wpdb->usermeta WHERE meta_key = '{$blog_prefix}capabilities'";
-		$result = sqlsrv_query( $wpdb->dbh, $query );
-		$result = sqlsrv_fetch_array($result);
-
-		$row = $result;
+		$row = $wpdb->get_row( "SELECT $select_count, COUNT(*) as total_users FROM $wpdb->usermeta WHERE meta_key = '{$blog_prefix}capabilities'", ARRAY_N );
 
 		// Run the previous loop again to associate results with role names.
 		$col = 0;
@@ -856,6 +871,8 @@ function count_users($strategy = 'time') {
 
 		$result['total_users'] = $total_users;
 		$result['avail_roles'] =& $role_counts;
+		
+		//$result = $wpapi->get_counted_users();
 	} else {
 		$avail_roles = array(
 			'none' => 0,
@@ -1368,7 +1385,7 @@ function validate_username( $username ) {
  *                      be created.
  */
 function wp_insert_user( $userdata ) {
-	global $wpdb;
+	global $wpapi, $wpdb, $current_user;
 
 	if ( $userdata instanceof stdClass ) {
 		$userdata = get_object_vars( $userdata );
@@ -1596,9 +1613,11 @@ function wp_insert_user( $userdata ) {
 		if ( $user_email !== $old_user_data->user_email ) {
 			$data['user_activation_key'] = '';
 		}
+		$wpapi->update_user( $user_login, $data );
 		$wpdb->update( $wpdb->users, $data, compact( 'ID' ) );
 		$user_id = (int) $ID;
 	} else {
+		$wpapi->insert_user($current_user, $data + compact( 'user_login' ));
 		$wpdb->insert( $wpdb->users, $data + compact( 'user_login' ) );
 		$user_id = (int) $wpdb->insert_id;
 	}

@@ -59,7 +59,11 @@ final class FLBuilderAdminSettings {
 	 */
 	static public function menu() 
 	{
-		if ( current_user_can( 'delete_users' ) ) {
+		//by andre
+		//if ( current_user_can( 'delete_users' ) ) {
+		//by andre end
+
+		if ( current_user_can( 'administrator' ) ) {
 			
 			$title = FLBuilderModel::get_branding();
 			$cap   = 'delete_users';

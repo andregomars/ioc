@@ -109,7 +109,7 @@ class WP_Roles {
 	 * @global array $wp_user_roles Used to set the 'roles' property value.
 	 */
 	protected function _init() {
-		global $wpdb, $wp_user_roles;
+		global $wpdb, $wp_user_roles, $wpapi;
 		$this->role_key = $wpdb->get_blog_prefix() . 'user_roles';
 		if ( ! empty( $wp_user_roles ) ) {
 			$this->roles = $wp_user_roles;
@@ -179,6 +179,8 @@ class WP_Roles {
 	 * @return WP_Role|void WP_Role object, if role is added.
 	 */
 	public function add_role( $role, $display_name, $capabilities = array() ) {
+		global $wpapi;
+
 		if ( empty( $role ) || isset( $this->roles[ $role ] ) ) {
 			return;
 		}
@@ -187,8 +189,10 @@ class WP_Roles {
 			'name' => $display_name,
 			'capabilities' => $capabilities
 			);
-		if ( $this->use_db )
+		if ( $this->use_db ) {
 			update_option( $this->role_key, $this->roles );
+			$wpapi->update_roles( $this->roles );
+		}
 		$this->role_objects[$role] = new WP_Role( $role, $capabilities );
 		$this->role_names[$role] = $display_name;
 		return $this->role_objects[$role];
@@ -203,6 +207,8 @@ class WP_Roles {
 	 * @param string $role Role name.
 	 */
 	public function remove_role( $role ) {
+		global $wpapi;
+
 		if ( ! isset( $this->role_objects[$role] ) )
 			return;
 
@@ -210,8 +216,10 @@ class WP_Roles {
 		unset( $this->role_names[$role] );
 		unset( $this->roles[$role] );
 
-		if ( $this->use_db )
+		if ( $this->use_db ) {
 			update_option( $this->role_key, $this->roles );
+			$wpapi->update_roles( $this->roles );
+		}
 
 		if ( get_option( 'default_role' ) == $role )
 			update_option( 'default_role', 'subscriber' );
@@ -228,12 +236,16 @@ class WP_Roles {
 	 * @param bool $grant Optional, default is true. Whether role is capable of performing capability.
 	 */
 	public function add_cap( $role, $cap, $grant = true ) {
+		global $wpapi;
+
 		if ( ! isset( $this->roles[$role] ) )
 			return;
 
 		$this->roles[$role]['capabilities'][$cap] = $grant;
-		if ( $this->use_db )
+		if ( $this->use_db ) {
 			update_option( $this->role_key, $this->roles );
+			$wpapi->update_roles( $this->roles );
+		}
 	}
 
 	/**
@@ -246,12 +258,16 @@ class WP_Roles {
 	 * @param string $cap Capability name.
 	 */
 	public function remove_cap( $role, $cap ) {
+		global $wpapi;
+		
 		if ( ! isset( $this->roles[$role] ) )
 			return;
 
 		unset( $this->roles[$role]['capabilities'][$cap] );
-		if ( $this->use_db )
+		if ( $this->use_db ) {
 			update_option( $this->role_key, $this->roles );
+			$wpapi->update_roles( $this->roles );
+		}
 	}
 
 	/**
