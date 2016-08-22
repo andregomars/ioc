@@ -605,6 +605,13 @@ function save_extra_in_profile( $user_id ) {
 
     if ( !current_user_can( 'edit_user', $user_id ) )
         return false;
+
+    $user_info = get_userdata($user_id);
+    if (!$user_info)
+    	return false;
+    $ioUser = $wpapi->get_user('user_login', $user_info->user_login);
+    if (!$ioUser)
+    	return false;
  
     //update_usermeta( absint( $user_id ), 'company_id', wp_kses_post( $_POST['companyID'] ) );
     $user_tel = wp_kses_post( $_POST['txt_tel'] );
@@ -616,14 +623,6 @@ function save_extra_in_profile( $user_id ) {
     $user_type = null;
     if ( !empty($_POST['dpl_user_type']) )
     	$user_type = wp_kses_post( $_POST['dpl_user_type'] );
-
-
-    $user_info = get_userdata($user_id);
-    if (!$user_info)
-    	return false;
-    $ioUser = $wpapi->get_user('user_login', $user_info->user_login);
-    if (!$ioUser)
-    	return false;
 
     $ioUser->Tel = $user_tel;
     $ioUser->Mobile = $user_mobile;
