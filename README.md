@@ -24,6 +24,6 @@ IOC Webfront
 8/21
 * ~~add default company code under current user company id when user created~~
 * ~~remove wp setting from admin menu, except admin~~
-* backup existing ioform.cs
-* browser compatability
-* move to target server
+* ~~backup existing ioform.cs~~
+* ~~browser compatability~~
+* ~~move to target server~~
