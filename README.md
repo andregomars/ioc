@@ -27,3 +27,9 @@ IOC Webfront
 * ~~backup existing ioform.cs~~
 * ~~browser compatability~~
 * ~~move to target server~~
+
+8/22
+* company CRUD with type
+* ~~disable role selection when manager create users, set it as subscriber by default~~
+* ~~set usertype when manager create users~~
+* password hash api adjustment
