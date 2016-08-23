@@ -459,9 +459,7 @@ add_action( 'show_user_profile', 'show_extra_in_profile' );
 add_action( 'edit_user_profile', 'show_extra_in_profile' );
 function show_extra_in_profile( $user ) { 
 	global $wpapi;
-	//$user_info = get_userdata($user->ID);
-	//if (!$user_info)
-	//	return false;
+
 	$ioUser = $wpapi->get_user('user_login', $user->user_login);
 	if (!$ioUser)
 		return false;
@@ -601,18 +599,18 @@ function get_user_type_list($value, $user_id, $original_user_id){
 add_action( 'personal_options_update', 'save_extra_in_profile' );
 add_action( 'edit_user_profile_update', 'save_extra_in_profile' );
 function save_extra_in_profile( $user_id ) {
- 	global $wpapi;
+ 	global $wpapi, $current_user;
 
-    if ( !current_user_can( 'edit_user', $user_id ) )
-        return false;
+    if ( !current_user_can( 'edit_user', $current_user->ID ) )
+        return;
 
     $user_info = get_userdata($user_id);
     if (!$user_info)
-    	return false;
+    	return;
     $ioUser = $wpapi->get_user('user_login', $user_info->user_login);
     if (!$ioUser)
-    	return false;
- 
+    	return;
+
     //update_usermeta( absint( $user_id ), 'company_id', wp_kses_post( $_POST['companyID'] ) );
     $user_tel = wp_kses_post( $_POST['txt_tel'] );
     $user_mobile = wp_kses_post( $_POST['txt_mobile'] );
@@ -706,4 +704,26 @@ function remove_plugins_count($update_data, $titles) {
 	return $update_data;
 }
 
+add_action('insert_user_meta',  'init_default_io_user_type', 10, 3);
+function init_default_io_user_type($meta, $user, $update) {
+	global $wpapi, $current_user;
+
+	if ( current_user_can('manager') ) {
+		$io_editor = $wpapi->get_user('user_login', $current_user->user_login);
+	    if ( $io_editor ) {
+	    	$editor_user_type = $io_editor->UserType;
+	    	if ( in_array($editor_user_type, array(4, 16, 64), true) ) {
+	    		$io_user = $wpapi->get_user('user_login', $user->user_login);
+	    		
+	    		if ( $io_user ) {
+	    			//set user type to normal
+	    			$io_user->UserType = intval($editor_user_type) / 2;   
+	    			$wpapi->update_io_user($io_user);
+	    		}
+	    	}
+	    }
+	}
+	
+    return array();  //return empty to avoid user meta update action for ioc users
+}
 //by andre end

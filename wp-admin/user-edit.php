@@ -225,15 +225,14 @@ if ( ! IS_PROFILE_PAGE ) {
 <input type="hidden" name="checkuser_id" value="<?php echo get_current_user_id(); ?>" />
 </p>
 
-<?php 
-	//by andre
-	if (false) {
-?>
-
 <h2><?php _e( 'Personal Options' ); ?></h2>
 
 <table class="form-table">
 
+<?php 
+	//by andre
+	if (false) {
+?>
 <?php if ( ! ( IS_PROFILE_PAGE && ! $user_can_edit ) ) : ?>
 	<tr class="user-rich-editing-wrap">
 		<th scope="row"><?php _e( 'Visual Editor' ); ?></th>
@@ -276,6 +275,11 @@ if ( !( IS_PROFILE_PAGE && !$user_can_edit ) ) : ?>
 </fieldset>
 </td>
 </tr>
+<?php 
+	}
+	//by andre end
+?>
+
 <?php
 /**
  * Fires at the end of the 'Personal Options' settings table on the user editing screen.
@@ -286,13 +290,7 @@ if ( !( IS_PROFILE_PAGE && !$user_can_edit ) ) : ?>
  */
 do_action( 'personal_options', $profileuser );
 ?>
-
 </table>
-
-<?php 
-	}
-	//by andre end
-?>
 
 <?php
 	if ( IS_PROFILE_PAGE ) {
