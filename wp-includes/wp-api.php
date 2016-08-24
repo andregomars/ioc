@@ -26,7 +26,8 @@ class wpapi {
 
 	//return hashed password
 	public function get_hashed_pass($password) {
-		$url = CORE_API_URL . 'Cipher/HashPassword/' . $password;
+		$escaped_pass =  rawurlencode( str_replace("%", " ", $password) );
+		$url = CORE_API_URL . 'Cipher/HashPassword/' . $escaped_pass;
 
 		$response = wp_remote_get( $url );
 		$body = wp_remote_retrieve_body( $response );
