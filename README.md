@@ -32,4 +32,4 @@ IOC Webfront
 * company CRUD with type
 * ~~disable role selection when manager create users, set it as subscriber by default~~
 * ~~set usertype when manager create users~~
-* password hash api adjustment
+* ~~password hash api adjustment~~
