@@ -409,12 +409,10 @@ class wpapi {
 
 	//mock of company list plugin data access
 	public function get_all_companies() {
-		return array (
-			'IO Control User' => 2,
-			'IO Control Administrator' => 4,
-			'Consumer User' => 8,
-			'Consumer Administrator' => 16,
-			'Manufacturer User' => 32,
-			'Manufacturer Administrator' => 64);
+		// return array (
+		// 	21 => 'I/O Controls Corporation',
+		// 	22 => 'LBT',
+		// 	23 => 'BYD');
+		return array(21, 22, 23);
 	}
 }

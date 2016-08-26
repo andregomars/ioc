@@ -1231,8 +1231,9 @@ class WP_List_Table {
 	 * @access public
 	 */
 	public function display_rows() {
-		foreach ( $this->items as $item )
+		foreach ( $this->items as $item ) {
 			$this->single_row( $item );
+		}
 	}
 
 	/**

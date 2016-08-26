@@ -162,8 +162,9 @@ final class IOC_Management_Plugin {
 		// require_once( $this->inc_dir . 'class-role.php'         );
 		// require_once( $this->inc_dir . 'class-role-factory.php' );
 
-		// Load template files.
-		// require_once( $this->inc_dir . 'template.php' );
+		// Load includes files.
+		require_once( $this->inc_dir . 'functions-companies.php');
+
 
 		// Load admin files.
 		if ( is_admin() ) {
@@ -171,10 +172,10 @@ final class IOC_Management_Plugin {
 			require_once( $this->admin_dir . 'functions-admin.php' );
 
 			// Role management.
-			require_once( $this->admin_dir . 'class-manage-companies.php'          );
-			require_once( $this->admin_dir . 'class-companies.php'                 );
+			require_once( $this->admin_dir . 'class-manage-companies.php');
+			require_once( $this->admin_dir . 'class-companies.php');
 			// require_once( $this->admin_dir . 'class-company-edit.php'             );
-			// require_once( $this->admin_dir . 'class-company-new.php'              );
+			require_once( $this->admin_dir . 'class-company-new.php'              );
 
 			// Edit capabilities tabs and groups.
 		}

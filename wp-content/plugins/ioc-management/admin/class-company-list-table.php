@@ -111,12 +111,12 @@ class IOC_Company_List_Table extends WP_List_Table {
 	 * @param  string     $role
 	 * @return string
 	 */
-	protected function column_cb( $company ) {
+	protected function column_cb( $company_id ) {
+		return null;
 
+		// $out = sprintf( '<input type="checkbox" name="companies[%1$s]" value="%1$s" />', esc_attr( $company ) );
 
-		$out = sprintf( '<input type="checkbox" name="companies[%1$s]" value="%1$s" />', esc_attr( $company ) );
-
-		return $out;
+		// return $out;
 	}
 
 	/**
@@ -127,10 +127,10 @@ class IOC_Company_List_Table extends WP_List_Table {
 	 * @param  string     $role
 	 * @return string
 	 */
-	protected function column_title( $company ) {
+	protected function column_title( $company_id ) {
 
 		// Add the title and role states.
-		$title = sprintf( '<strong><a class="row-title">%s</a></strong>', $company->Name );
+		$title = sprintf( '<strong><a class="row-title">%s</a></strong>', esc_html( ioc_get_company_name( $company_id ) ) );
 
 		return $title;
 	}
@@ -143,8 +143,16 @@ class IOC_Company_List_Table extends WP_List_Table {
 	 * @param  string     $role
 	 * @return string
 	 */
-	protected function column_id( $company ) {
-		return $company->CompanyId;
+	protected function column_id( $company_id ) {
+		return $company_id;
+	}
+
+	protected function column_type( $company_id ) {
+
+		// Add the title and role states.
+		$type = sprintf( '%s', esc_html( ioc_get_company_type( $company_id ) ) );
+
+		return $type;
 	}
 
 	/**
@@ -190,10 +198,7 @@ class IOC_Company_List_Table extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_sortable_columns() {
-
-		return array(
-			'title' => array( 'title',  true  ),
-		);
+		return array();
 	}
 
 	/**

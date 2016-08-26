@@ -18,7 +18,7 @@ final class IOC_Admin_Companies {
 		add_action( 'current_screen', array( $this, 'current_screen' ) );
 
 		// Set up the role list table columns.
-		add_filter( 'ioc_manage_companies_columns', array( $this, 'manage_companies_columns' ), 5 );
+		add_filter( 'manage_users_page_companies_columns', array( $this, 'manage_companies_columns' ), 5 );
 
 	}
 
@@ -46,9 +46,17 @@ final class IOC_Admin_Companies {
 	public function manage_companies_columns( $columns ) {
 
 		$columns = array(
-			'cb'            => '<input type="checkbox" />',
+			//'cb'            => '<input type="checkbox" />',
 			'title'         => esc_html__( 'Company Name', 'iocmanagement' ),
-			'id'          => esc_html__( 'ID',      'iocmanagement' )
+			'id'          => esc_html__( 'ID',      'iocmanagement' ),
+			'type'          => esc_html__( 'Type',      'iocmanagement' ),
+			'address'          => esc_html__( 'Address',      'iocmanagement' ),
+			'city'          => esc_html__( 'City',      'iocmanagement' ),
+			'state'          => esc_html__( 'State',      'iocmanagement' ),
+			'zipcode'          => esc_html__( 'Zip Code',      'iocmanagement' ),
+			'fax'          => esc_html__( 'Fax',      'iocmanagement' ),
+			'tel'          => esc_html__( 'Tel',      'iocmanagement' )
+
 		);
 
 		return apply_filters( 'ioc_manage_companies_columns', $columns );
