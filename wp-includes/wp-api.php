@@ -407,4 +407,12 @@ class wpapi {
 		return true;
 	}
 
+	//mock of company list plugin data access
+	public function get_all_companies() {
+		// return array (
+		// 	21 => 'I/O Controls Corporation',
+		// 	22 => 'LBT',
+		// 	23 => 'BYD');
+		return array(21, 22, 23);
+	}
 }
