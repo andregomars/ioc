@@ -159,8 +159,8 @@ final class IOC_Management_Plugin {
 	private function includes() {
 
 		// Load class files.
-		// require_once( $this->inc_dir . 'class-role.php'         );
-		// require_once( $this->inc_dir . 'class-role-factory.php' );
+		require_once( $this->inc_dir . 'class-company.php'         );
+		require_once( $this->inc_dir . 'class-company-factory.php' );
 
 		// Load includes files.
 		require_once( $this->inc_dir . 'functions-companies.php');

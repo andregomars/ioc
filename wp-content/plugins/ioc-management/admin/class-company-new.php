@@ -94,32 +94,75 @@ final class IOC_Admin_Company_New {
 		}
 	}
 
-	/**
-	 * Checks posted data on load and performs actions if needed.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
+	
 	public function load() {
+		global $wpapi;
 
-
-		// Check if the current user can create roles and the form has been submitted.
 		if ( current_user_can( 'create_roles' ) ) {
 
-			// Sanitize the new role name/label. We just want to strip any tags here.
-			if ( ! empty( $_POST['company_name'] ) )
+			if ( ! empty( $_POST['txt_company_name'] ) )
 				$this->company_name = wp_strip_all_tags( $_POST['txt_company_name'] );
+
+			$company_type = 0;
+			$company_address = '';
+			$company_city = '';
+			$company_state = '';
+			$company_zipcode = '';
+			$company_fax = '';
+			$company_tel = '';
+
+			if ( ! empty( $_POST['dpl_company_type'] ) ) {
+				$company_type = wp_strip_all_tags( $_POST['dpl_company_type'] );
+				// switch ( $company_type ) {
+				// 	case 'IO': $company_type_id = 2; break;
+				// 	case 'Transit': $company_type_id = 4; break;
+				// 	case 'Builder': $company_type_id = 8; break;
+				// 	default: $company_type_id = 0; break;
+				// }
+			}
+
+			if ( ! empty( $_POST['txt_address'] ) )
+				$company_address = wp_strip_all_tags( $_POST['txt_address'] );
+
+			if ( ! empty( $_POST['txt_city'] ) )
+				$company_city = wp_strip_all_tags( $_POST['txt_city'] );
+
+			if ( ! empty( $_POST['txt_state'] ) )
+				$company_state = wp_strip_all_tags( $_POST['txt_state'] );
+
+			if ( ! empty( $_POST['txt_zipcode'] ) )
+				$company_zipcode = wp_strip_all_tags( $_POST['txt_zipcode'] );
+
+			if ( ! empty( $_POST['txt_fax'] ) )
+				$company_fax = wp_strip_all_tags( $_POST['txt_fax'] );
+
+			if ( ! empty( $_POST['txt_tel'] ) )
+				$company_tel = wp_strip_all_tags( $_POST['txt_tel'] );
 
 			// Is duplicate?
 			$is_duplicate = false;
-			if ( ioc_company_exists( $this->company_id ) )
+			if ( ioc_company_exists( $this->company_name ) )
 				$is_duplicate = true;
 
 			// Add a new role with the data input.
 			if ( $this->company_name && ! $is_duplicate ) {
 
 				//add company throug API
+				$new_company = array (
+					'Name' => $this->company_name,
+					'CompanyType' => $company_type,
+					'Address' => $company_address,
+					'City' => $company_city,
+					'State' => $company_state,
+					'ZipCode' => $company_zipcode,
+					'Fax' => $company_fax,
+					'Tel' => $company_tel,
+					'IsStop' => 0,
+					'Status' => 0,
+					'CreateTime' => date('c') );
+
+
+				$wpapi->insert_company( $new_company );
 
 				// Add role added message.
 				add_settings_error( 'ioc_company_new', 'company_added', sprintf( esc_html__( 'The %s company has been created.', 'companies' ), $this->company_name ), 'updated' );
@@ -130,8 +173,9 @@ final class IOC_Admin_Company_New {
 				add_settings_error( 'ioc_company_new', 'no_company', esc_html__( 'You must enter a valid company.', 'companies' ) );
 
 			// Add error if this is a duplicate role.
-			if ( $is_duplicate )
+			if ( $is_duplicate ) {
 				add_settings_error( 'ioc_company_new', 'duplicate_company', sprintf( esc_html__( 'The %s company already exists.', 'companies' ), $this->company_name ) );
+			}
 
 		}
 
@@ -176,22 +220,22 @@ final class IOC_Admin_Company_New {
 								</tr>
 								<tr class="form-field form-required">
 									<th scope="row"><label>Zip Code</label></th>
-									<td><input name="txt_city" type="text" id="txt_city" class="regular-text" /></td>
+									<td><input name="txt_zipcode" type="text" id="txt_city" class="regular-text" /></td>
 								</tr>
 								<tr class="form-field form-required">
 									<th scope="row"><label>Fax</label></th>
-									<td><input name="txt_city" type="text" id="txt_city" class="regular-text" /></td>
+									<td><input name="txt_fax" type="text" id="txt_city" class="regular-text" /></td>
 								</tr>
 								<tr class="form-field form-required">
 									<th scope="row"><label>Tel</label></th>
-									<td><input name="txt_city" type="text" id="txt_city" class="regular-text" /></td>
+									<td><input name="txt_tel" type="text" id="txt_city" class="regular-text" /></td>
 								</tr>
 								<tr class="form-field form-required">
 									<th scope="row"><label>Description</label></th>
-									<td><input name="txt_city" type="text" id="txt_city" class="regular-text" /></td>
+									<td><input name="txt_description" type="text" id="txt_city" class="regular-text" /></td>
 								</tr>
 								<tr>
-									<th scope="row"><label>Description</label></th>
+									<th scope="row"><label>Company Type</label></th>
 									<td>
 						        		<select name="dpl_company_type" id="dpl_company_type">
 											<option value="2">IO</option>
