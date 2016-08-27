@@ -77,10 +77,11 @@ class IOC_Company_List_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $wpapi;
 
-		$companies = $wpapi->get_all_companies();
+		//$companies = json_encode($wpapi->get_all_company_names());
+		$company_names = $wpapi->get_all_company_names();
 
 		// Set up some current page variables.
-		$items        = $companies;
+		$items        = $company_names;
 		$total_count  = count( $items );
 
 		// Set the current page items.
@@ -119,42 +120,50 @@ class IOC_Company_List_Table extends WP_List_Table {
 		// return $out;
 	}
 
-	/**
-	 * The role name column callback.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  string     $role
-	 * @return string
-	 */
 	protected function column_title( $company_id ) {
 
-		// Add the title and role states.
-		$title = sprintf( '<strong><a class="row-title">%s</a></strong>', esc_html( ioc_get_company_name( $company_id ) ) );
-
-		return $title;
+		return sprintf( '<strong><a class="row-title">%s</a></strong>', esc_html( ioc_get_company_name( $company_id ) ) );
 	}
 
-	/**
-	 * The role column callback.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  string     $role
-	 * @return string
-	 */
 	protected function column_id( $company_id ) {
+
 		return $company_id;
 	}
 
 	protected function column_type( $company_id ) {
 
-		// Add the title and role states.
-		$type = sprintf( '%s', esc_html( ioc_get_company_type( $company_id ) ) );
-
-		return $type;
+		return sprintf( '%s', esc_html( ioc_get_company_type( $company_id ) ) );
 	}
 
+	protected function column_address( $company_id ) {
+
+		return sprintf( '%s', esc_html( ioc_get_company_address( $company_id ) ) );
+	}
+
+	protected function column_city( $company_id ) {
+
+		return sprintf( '%s', esc_html( ioc_get_company_city( $company_id ) ) );
+	}
+
+	protected function column_state( $company_id ) {
+
+		return sprintf( '%s', esc_html( ioc_get_company_state( $company_id ) ) );
+	}
+
+	protected function column_zipcode( $company_id ) {
+
+		return sprintf( '%s', esc_html( ioc_get_company_zipcode( $company_id ) ) );
+	}
+
+	protected function column_fax( $company_id ) {
+
+		return sprintf( '%s', esc_html( ioc_get_company_fax( $company_id ) ) );
+	}
+
+	protected function column_tel( $company_id ) {
+
+		return sprintf( '%s', esc_html( ioc_get_company_tel( $company_id ) ) );
+	}
 	/**
 	 * Returns the name of the primary column.
 	 *
