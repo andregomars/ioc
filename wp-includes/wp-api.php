@@ -37,6 +37,10 @@ class wpapi {
 			return "*";
 	}
 
+
+	/*
+	 * cAPI methods - company
+	*/
 	//return company name list
 	public function get_all_company_names() {
 		$url = CORE_API_URL . 'IO_Company/';
@@ -81,10 +85,10 @@ class wpapi {
 		return json_decode($body);
 	}
 
-	//return: void
+	//return: company object
 	public function insert_company( $company ) {
 		if ( !$company )
-			return 0;
+			return null;
 
 		$url_company = CORE_API_URL . 'IO_Company/';
 		
@@ -101,8 +105,26 @@ class wpapi {
 		} 
 
 		$responseBody = wp_remote_retrieve_body( $response_insert_company );
-		return 1;
+		$new_company = json_decode($responseBody);
+
+		return $new_company;
 	}
+
+	//return boolean
+	public function delete_company( $company_id ) {
+		$url = CORE_API_URL . 'IO_Company/' . $company_id;
+
+		$response = wp_remote_delete( $url );
+		if ( is_wp_error( $response ) || !$response ) {
+			return false;
+		} 
+
+		return true;
+	}
+
+	/*
+	 * API methods - user
+	*/
 
 	//return io user
 	public function get_user($field, $value) {

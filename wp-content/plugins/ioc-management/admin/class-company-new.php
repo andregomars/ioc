@@ -96,29 +96,25 @@ final class IOC_Admin_Company_New {
 
 	
 	public function load() {
-		global $wpapi;
 
 		if ( current_user_can( 'create_roles' ) ) {
+			// Verify the nonce.
+			//check_admin_referer( 'new_company', 'ioc_new_company_nonce' );
 
 			if ( ! empty( $_POST['txt_company_name'] ) )
 				$this->company_name = wp_strip_all_tags( $_POST['txt_company_name'] );
 
 			$company_type = 0;
-			$company_address = '';
-			$company_city = '';
-			$company_state = '';
-			$company_zipcode = '';
-			$company_fax = '';
-			$company_tel = '';
+			$company_address = null;
+			$company_city = null;
+			$company_state = null;
+			$company_zipcode = null;
+			$company_fax = null;
+			$company_tel = null;
+			$company_description = null;
 
 			if ( ! empty( $_POST['dpl_company_type'] ) ) {
 				$company_type = wp_strip_all_tags( $_POST['dpl_company_type'] );
-				// switch ( $company_type ) {
-				// 	case 'IO': $company_type_id = 2; break;
-				// 	case 'Transit': $company_type_id = 4; break;
-				// 	case 'Builder': $company_type_id = 8; break;
-				// 	default: $company_type_id = 0; break;
-				// }
 			}
 
 			if ( ! empty( $_POST['txt_address'] ) )
@@ -139,12 +135,15 @@ final class IOC_Admin_Company_New {
 			if ( ! empty( $_POST['txt_tel'] ) )
 				$company_tel = wp_strip_all_tags( $_POST['txt_tel'] );
 
+			if ( ! empty( $_POST['txt_description'] ) )
+				$company_description = wp_strip_all_tags( $_POST['txt_description'] );
+
 			// Is duplicate?
 			$is_duplicate = false;
 			if ( ioc_company_exists( $this->company_name ) )
 				$is_duplicate = true;
 
-			// Add a new role with the data input.
+			// Add a new company with the data input.
 			if ( $this->company_name && ! $is_duplicate ) {
 
 				//add company throug API
@@ -157,22 +156,23 @@ final class IOC_Admin_Company_New {
 					'ZipCode' => $company_zipcode,
 					'Fax' => $company_fax,
 					'Tel' => $company_tel,
+					'Description' => $company_description,
 					'IsStop' => 0,
 					'Status' => 0,
 					'CreateTime' => date('c') );
 
 
-				$wpapi->insert_company( $new_company );
+				ioc_insert_company( $new_company );
 
-				// Add role added message.
+				// Add company added message.
 				add_settings_error( 'ioc_company_new', 'company_added', sprintf( esc_html__( 'The %s company has been created.', 'companies' ), $this->company_name ), 'updated' );
 			}
 
-			// Add error if there's no role.
-			if ( ! $this->company_name )
-				add_settings_error( 'ioc_company_new', 'no_company', esc_html__( 'You must enter a valid company.', 'companies' ) );
+			// Add error if there's no company.
+			// if ( ! $this->company_name )
+			// 	add_settings_error( 'ioc_company_new', 'no_company', esc_html__( 'You must enter a valid company.', 'companies' ) );
 
-			// Add error if this is a duplicate role.
+			// Add error if this is a duplicate company.
 			if ( $is_duplicate ) {
 				add_settings_error( 'ioc_company_new', 'duplicate_company', sprintf( esc_html__( 'The %s company already exists.', 'companies' ), $this->company_name ) );
 			}
@@ -193,6 +193,8 @@ final class IOC_Admin_Company_New {
 		<div class="wrap">
 
 			<h1>Add New Company</h1>
+
+			<?php settings_errors( 'ioc_company_new' ); ?>
 
 			<div id="poststuff">
 

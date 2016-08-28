@@ -3,14 +3,14 @@
 class IOC_Company {
 
 	public $id = 0;
-	public $name = '';
-	public $description = '';
+	public $name = null;
+	public $description = null;
 	public $type_id = 0; 
-	public $type_name = '';
-	public $address = '';
-	public $city = '';
-	public $state = '';
-	public $zipcode = '';
+	public $type_name = null;
+	public $address = null;
+	public $city = null;
+	public $state = null;
+	public $zipcode = null;
 	
 	public function __construct( $company_id ) {
 		global $wpapi;

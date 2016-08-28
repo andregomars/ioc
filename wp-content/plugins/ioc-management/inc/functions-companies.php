@@ -55,3 +55,21 @@ function ioc_company_exists( $company_name ) {
 
 	return false;
 }
+
+function ioc_company_id_exists( $company_id ) {
+	global $wpapi;
+
+	if ( is_null( $company_id ) ) 
+		return false;
+
+	$company = $wpapi->get_company( $company_id );
+
+	return !is_null( $company );
+}
+
+
+function ioc_get_delete_company_url( $company_id ) {
+	$url = add_query_arg( array( 'action' => 'delete', 'company_id' => $company_id ), ioc_get_edit_companies_url() );
+
+	return wp_nonce_url( $url, 'delete_company', 'ioc_delete_company_nonce' );
+}
