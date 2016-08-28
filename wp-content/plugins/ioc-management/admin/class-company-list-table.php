@@ -67,13 +67,6 @@ class IOC_Company_List_Table extends WP_List_Table {
 			$this->company_view = $_GET['company_view'];
 	}
 
-	/**
-	 * Sets up the items (roles) to list.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
 	public function prepare_items() {
 		global $wpapi;
 
@@ -91,27 +84,10 @@ class IOC_Company_List_Table extends WP_List_Table {
 		$this->set_pagination_args( array( 'total_items' => $total_count, 'per_page' => $total_count ) );
 	}
 
-	/**
-	 * Returns an array of columns to show.
-	 *
-	 * @see    members_manage_roles_columns()
-	 * @since  1.0.0
-	 * @access public
-	 * @return array
-	 */
 	public function get_columns() {
 		return get_column_headers( $this->screen );
 	}
 
-
-	/**
-	 * The checkbox column callback.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  string     $role
-	 * @return string
-	 */
 	protected function column_cb( $company_id ) {
 		return null;
 
@@ -164,35 +140,21 @@ class IOC_Company_List_Table extends WP_List_Table {
 
 		return sprintf( '%s', esc_html( ioc_get_company_tel( $company_id ) ) );
 	}
-	/**
-	 * Returns the name of the primary column.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return string
-	 */
+
+
 	protected function get_default_primary_column_name() {
 		return 'title';
 	}
 
-	/**
-	 * Handles the row actions.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @param  string     $role
-	 * @param  string     $column_name
-	 * @param  string     $primary
-	 * @return array
-	 */
-	protected function handle_row_actions( $company, $column_name, $primary ) {
+
+	protected function handle_row_actions( $company_id, $column_name, $primary ) {
 
 		$actions = array();
 
 		// Only add row actions on the primary column (title/role name).
 		if ( $primary === $column_name ) {
 
-			$actions['delete'] = sprintf( '<a href="%s">%s</a>', '#', 'Delete' );
+			$actions['delete'] = sprintf( '<a href="%s">%s</a>', ioc_get_delete_company_url( $company_id ), 'Delete' );
 
 		}
 

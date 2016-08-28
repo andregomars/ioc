@@ -5,13 +5,7 @@
   */
 final class IOC_Admin_Companies {
 
-	/**
-	 * Sets up some necessary actions/filters.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
+
 	public function __construct() {
 
 		// Set up some page options for the current screen.
@@ -22,27 +16,14 @@ final class IOC_Admin_Companies {
 
 	}
 
-	/**
-	 * Modifies the current screen object.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
+
 	public function current_screen( $screen ) {
 
 		if ( 'users_page_roles' === $screen->id )
 			$screen->add_option( 'per_page', array( 'default' => 20 ) );
 	}
 
-	/**
-	 * Sets up the roles column headers.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @param  array  $columns
-	 * @return array
-	 */
+
 	public function manage_companies_columns( $columns ) {
 
 		$columns = array(
@@ -62,56 +43,38 @@ final class IOC_Admin_Companies {
 		return apply_filters( 'ioc_manage_companies_columns', $columns );
 	}
 
-	/**
-	 * Runs on the `load-{$page}` hook.  This is the handler for form submissions and requests.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
+
 	public function load() {
 
 		// Get the current action if sent as request.
 		$action = isset( $_REQUEST['action'] ) ? sanitize_key( $_REQUEST['action'] ) : false;
 
 
-		// Delete single role handler.
+		// Delete single company handler.
 		if ( 'delete' === $action ) {
 
-			// Make sure the current user can delete roles.
 			if ( current_user_can( 'delete_roles' ) ) {
 
-				// Get the role we want to delete.
-				$company = $_GET['company'] ;
+				$company_id = $_GET['company_id'] ;
 
-				// Add role deleted message.
-				add_settings_error( 'ioc_companies', 'company_deleted', sprintf( esc_html__( '%s company deleted.', 'iocmanagement' ), $company ), 'updated' );
+				if ( ioc_company_id_exists($company_id) ) {
+					// Add company deleted message.
+					add_settings_error( 'ioc_companies', 'company_deleted', sprintf( esc_html__( '%s company deleted.', 'iocmanagement' ), $company_id ), 'updated' );
 
-				// Delete the role.
-				//delete company
+					//Delete company
+					ioc_delete_company( $company_id );
+				}
 			}
 		}
 
 	}
 
-	/**
-	 * Enqueue scripts/styles.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
+
 	public function enqueue() {
 
 	}
 
-	/**
-	 * Displays the page content.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
+
 	public function page() {
 
 		require_once( ioc_management_plugin()->admin_dir . 'class-company-list-table.php' ); ?>
@@ -128,13 +91,13 @@ final class IOC_Admin_Companies {
 
 			<div id="poststuff">
 
-				<form id="roles" action="<?php echo esc_url( ioc_get_edit_companies_url() ); ?>" method="post">
+				<form id="companies" action="<?php echo esc_url( ioc_get_edit_companies_url() ); ?>" method="post">
 
 					<?php $table = new IOC_Company_List_Table(); ?>
 					<?php $table->prepare_items(); ?>
 					<?php $table->display(); ?>
 
-				</form><!-- #roles -->
+				</form><!-- #companies -->
 
 			</div><!-- #poststuff -->
 
