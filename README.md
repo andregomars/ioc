@@ -33,3 +33,6 @@ IOC Webfront
 * ~~disable role selection when manager create users, set it as subscriber by default~~
 * ~~set usertype when manager create users~~
 * ~~password hash api adjustment~~
+
+8/28
+* remove views row from users list
