@@ -4,49 +4,13 @@
  */
 class IOC_Company_List_Table extends WP_List_Table {
 
-	/**
-	 * The current view.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    string
-	 */
+
 	public $company_view = 'all';
 
-	/**
-	 * Allowed role views.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    array
-	 */
 	public $allowed_company_views = array();
 
-	/**
-	 * The default role.  This will be assigned the value of `get_option( 'default_role' )`.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    string
-	 */
 	public $default_company = 'io control';
 
-	/**
-	 * The current user object.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    object
-	 */
-	public $current_user = '';
-
-	/**
-	 * Sets up the list table.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
 	public function __construct() {
 
 		$args = array(
@@ -56,10 +20,6 @@ class IOC_Company_List_Table extends WP_List_Table {
 
 		parent::__construct( $args );
 
-		// Get the current user object.
-		$this->current_user = new WP_User( get_current_user_id() );
-
-		// Get the role views.
 		$this->allowed_company_views = array_keys( $this->get_views() );
 
 		// Get the current view.
@@ -161,36 +121,15 @@ class IOC_Company_List_Table extends WP_List_Table {
 		return $this->row_actions( $actions );
 	}
 
-	/**
-	 * Returns an array of sortable columns.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return array
-	 */
 	protected function get_sortable_columns() {
 		return array();
 	}
 
-	/**
-	 * Returns an array of views for the list table.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return array
-	 */
 	protected function get_views() {
 
 		return array();
 	}
 
-	/**
-	 * Displays the list table.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
 	public function display() {
 
 		$this->views();
@@ -198,13 +137,6 @@ class IOC_Company_List_Table extends WP_List_Table {
 		parent::display();
 	}
 
-	/**
-	 * Returns an array of bulk actions available.
-	 *
-	 * @since  1.0.0
-	 * @access protected
-	 * @return array
-	 */
 	protected function get_bulk_actions() {
 		return array();
 	}

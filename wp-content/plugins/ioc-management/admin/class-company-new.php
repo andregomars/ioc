@@ -2,88 +2,19 @@
 
 final class IOC_Admin_Company_New {
 
-	/**
-	 * Holds the instances of this class.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 * @var    object
-	 */
 	private static $instance;
 
-	/**
-	 * Name of the page we've created.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    string
-	 */
 	public $page = '';
 
-	/**
-	 * Role that's being created.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    string
-	 */
 	public $company_id;
 
-	/**
-	 * Name of the role that's being created.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    string
-	 */
 	public $company_name = '';
 
-	/**
-	 * Array of the role's capabilities.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    array
-	 */
-	public $capabilities = array();
-
-	/**
-	 * Conditional to see if we're cloning a role.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    bool
-	 */
-	public $is_clone = false;
-
-	/**
-	 * Role that is being cloned.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @var    string
-	 */
-	public $clone_role = '';
-
-	/**
-	 * Sets up our initial actions.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
 	public function __construct() {
 
 		add_action( 'admin_menu', array( $this, 'add_admin_page' ) );
 	}
 
-	/**
-	 * Adds the roles page to the admin.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
 	public function add_admin_page() {
 
 		$this->page = add_submenu_page( 'users.php', esc_html__( 'Add New Company', 'iocmanagement' ), esc_html__( 'Add New Company', 'iocmanagement' ), 'create_roles', 'company-new', array( $this, 'page' ) );
@@ -181,13 +112,6 @@ final class IOC_Admin_Company_New {
 
 	}
 
-	/**
-	 * Outputs the page.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return void
-	 */
 	public function page() { ?>
 
 		<div class="wrap">
@@ -267,13 +191,6 @@ final class IOC_Admin_Company_New {
 	<?php }
 
 
-	/**
-	 * Returns the instance.
-	 *
-	 * @since  1.0.0
-	 * @access public
-	 * @return object
-	 */
 	public static function get_instance() {
 
 		if ( ! self::$instance )
