@@ -49,7 +49,7 @@ function ioc_company_exists( $company_name ) {
 
 	$company_names = $wpapi->get_all_company_names();
 	foreach ( $company_names as $key=>$value ) {
-		if ( strcmp( $company_name , $key ) === 0 )
+		if ( strcasecmp( $company_name , $key ) === 0 )
 			return true;
 	}
 
