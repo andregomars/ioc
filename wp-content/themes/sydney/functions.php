@@ -730,4 +730,16 @@ function init_default_io_user_type($meta, $user, $update) {
 	
     return array();  //return empty to avoid user meta update action for ioc users
 }
+
+/*
+ * remove view row for non-admins in users list page
+ */
+add_filter('views_users', 'clear_users_count_views', 999, 3);
+function clear_users_count_views($views) {
+	if ( !current_user_can('administrator') ) {
+		return array();
+	}
+
+	return $views;
+}
 //by andre end
