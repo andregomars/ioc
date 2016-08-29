@@ -575,7 +575,11 @@ function get_user_sex($value, $user_id, $original_user_id){
 add_filter( 'get_the_author_company_id', 'get_user_company_list', 999, 3 );
 function get_user_company_list($value, $user_id, $original_user_id){
 	global $wpapi;
-	return $wpapi->get_all_company_names();
+	
+	$list = $wpapi->get_all_company_names();
+	//array_push( $list, array('-- Please select --' => 0) );
+
+	return $list;
 }
 
 /*

@@ -37,7 +37,11 @@ class wpapi {
 			return "*";
 	}
 
-	//return company list
+
+	/*
+	 * cAPI methods - company
+	*/
+	//return company name list
 	public function get_all_company_names() {
 		$url = CORE_API_URL . 'IO_Company/';
 
@@ -47,8 +51,7 @@ class wpapi {
 			return array();
 
 		$io_companies = json_decode($body);
-		//$io_companies = $body;
-		$company_names = array('-- Please select --' => 0);
+		//$company_names = array('-- Please select --' => 0);
 		if ($io_companies) {
 			foreach($io_companies as $value) {
 				$company_names[$value->Name] = $value->CompanyId;
@@ -57,6 +60,71 @@ class wpapi {
 		
 		return $company_names;
 	}
+
+	//return company list
+	public function get_all_companies() {
+		$url = CORE_API_URL . 'IO_Company/';
+
+		$response = wp_remote_get( $url );
+		$body = wp_remote_retrieve_body( $response );
+		if( !$body ) 
+			return array();
+
+		return json_decode($body);
+	}
+
+	//return company
+	public function get_company( $company_id ) {
+		$url = CORE_API_URL . 'IO_Company/' . $company_id;
+
+		$response = wp_remote_get( $url );
+		$body = wp_remote_retrieve_body( $response );
+		if( !$body ) 
+			return null;
+
+		return json_decode($body);
+	}
+
+	//return: company object
+	public function insert_company( $company ) {
+		if ( !$company )
+			return null;
+
+		$url_company = CORE_API_URL . 'IO_Company/';
+		
+		$options = array(
+			'headers' => array(
+				'Content-Type' => 'text/json'
+			),
+			'body'	=> json_encode($company)
+		);
+
+		$response_insert_company = wp_remote_post( $url_company, $options );
+		if ( is_wp_error( $response_insert_company ) || !$response_insert_company ) {
+			return 0;
+		} 
+
+		$responseBody = wp_remote_retrieve_body( $response_insert_company );
+		$new_company = json_decode($responseBody);
+
+		return $new_company;
+	}
+
+	//return boolean
+	public function delete_company( $company_id ) {
+		$url = CORE_API_URL . 'IO_Company/' . $company_id;
+
+		$response = wp_remote_delete( $url );
+		if ( is_wp_error( $response ) || !$response ) {
+			return false;
+		} 
+
+		return true;
+	}
+
+	/*
+	 * API methods - user
+	*/
 
 	//return io user
 	public function get_user($field, $value) {
@@ -407,4 +475,12 @@ class wpapi {
 		return true;
 	}
 
+	// //mock of company list plugin data access
+	// public function get_all_companies() {
+	// 	// return array (
+	// 	// 	21 => 'I/O Controls Corporation',
+	// 	// 	22 => 'LBT',
+	// 	// 	23 => 'BYD');
+	// 	return array(21, 22, 23);
+	// }
 }
