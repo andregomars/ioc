@@ -35,4 +35,4 @@ IOC Webfront
 * ~~password hash api adjustment~~
 
 8/28
-* remove views row from users list
+* ~~remove views row from users list~~
