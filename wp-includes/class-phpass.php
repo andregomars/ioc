@@ -222,7 +222,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function hash_password($password) {
+	function HashPassword($password) {
 		global $wpapi;
 
 		if ( strlen( $password ) > 4096 ) {
@@ -233,7 +233,7 @@ class PasswordHash {
 		return $wpapi->get_hashed_pass($password);
 	}
 
-	function check_password($password, $stored_hash) {
+	function CheckPassword($password, $stored_hash) {
 		global $wpapi;
 
 		if ( strlen( $password ) > 4096 ) {
