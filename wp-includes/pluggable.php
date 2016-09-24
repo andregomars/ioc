@@ -2033,7 +2033,7 @@ function wp_hash_password($password) {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	return $wp_hasher->hash_password( trim( $password ) );
+	return $wp_hasher->HashPassword( trim( $password ) );
 }
 endif;
 
@@ -2071,7 +2071,7 @@ function wp_check_password($password, $hash, $user_id = '') {
 		$wp_hasher = new PasswordHash(8, true);
 	}
 
-	$check = $wp_hasher->check_password($password, $hash);
+	$check = $wp_hasher->CheckPassword($password, $hash);
 
 	/** This filter is documented in wp-includes/pluggable.php */
 	return apply_filters( 'check_password', $check, $password, $hash, $user_id );
