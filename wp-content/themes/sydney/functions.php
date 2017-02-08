@@ -4,7 +4,7 @@
  *
  * @package Sydney
  */
-
+require( WP_CONTENT_DIR . '/themes/sydney/hams-functions.php' );
 
 if ( ! function_exists( 'sydney_setup' ) ) :
 /**
