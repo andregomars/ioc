@@ -247,7 +247,10 @@ Content
 .page-wrap .content-wrapper {
 	padding-top: 15px;
 	padding-bottom: 15px;
+	margin-left: 0px;
+	margin-right: 0px;
 	background-color: #fff;
+	width: 100%;
 }
 .page .page-wrap .content-wrapper,
 .single .page-wrap .content-wrapper {

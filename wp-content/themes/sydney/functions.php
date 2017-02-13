@@ -118,6 +118,16 @@ function sydney_widgets_init() {
 		'before_title'  => '<h3 class="widget-title">',
 		'after_title'   => '</h3>',
 	) );
+
+	register_sidebar( array(
+		'name'          => __( 'Sidebar_hams', 'sydney' ),
+		'id'            => 'sidebar-hams',
+		'description'   => '',
+		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</aside>',
+		'before_title'  => '<h3 class="widget-title">',
+		'after_title'   => '</h3>',
+	) );
 	//by andre end
 
 	//Footer widget areas
