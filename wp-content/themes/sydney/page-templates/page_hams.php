@@ -1,23 +1,26 @@
-<?php
-/*
-Template Name: HAMS Page
-*/
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HAMS</title>
+  <base href="/ioc/index.php/hams">
 
-get_header(); ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" type="text/css" href="./../wp-includes/css/hams/omega.theme.css" />
+  <link rel="stylesheet" type="text/css" href="./../wp-includes/css/hams/primeng.min.css" />
 
-	<div class="fullwidth">
-			<div class="container" style="margin-left: 0px; margin-right: 0px; width: 100%">
-				<div class="row">
-					<div class="col-md-1">
-						<?php dynamic_sidebar( 'sidebar-hams' ); ?>
-					</div>
-					<div class="entry-content col-md-11">
-						<?php while ( have_posts() ) : the_post(); ?>
-							<?php the_content(); ?>
-						<?php endwhile; ?>
-					</div><!-- .entry-content -->	
-				</div>
-			</div>
-	</div><!-- #primary -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+  
+</head>
+<body>
+  <app-root>Loading...</app-root>
+  <script type="text/javascript" src="./../wp-includes/js/hams/inline.bundle.js"></script>
+  <script type="text/javascript" src="./../wp-includes/js/hams/polyfills.bundle.js"></script>
+  <script type="text/javascript" src="./../wp-includes/js/hams/main.bundle.js"></script></body>
 
-<?php get_footer(); ?>
+</body>
+</html>
