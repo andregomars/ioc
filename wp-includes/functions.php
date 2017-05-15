@@ -10,7 +10,7 @@ function mssql_escape( $string ) {
 }
 
 require( ABSPATH . WPINC . '/option.php' );
-require( ABSPATH . WPINC . '/hams-functions.php' );
+// require( ABSPATH . WPINC . '/hams-functions.php' );
 
 /**
  * Convert given date string into a different format.

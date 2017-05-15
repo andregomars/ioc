@@ -1,6 +1,6 @@
 <?php
 /**
- * The header for our HAMS management system.
+ * The header for our theme.
  *
  * Displays all of the <head> section and everything up till <div id="content">
  *
@@ -20,9 +20,18 @@
 <?php endif; ?>
 
 <?php wp_head(); ?>
+<!-- angular app header section begin -->
+<base href="/ioc/index.php/hams">
+<link rel="stylesheet" type="text/css" href="<?php echo esc_url(includes_url())?>assets/styles/omega.theme.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo esc_url(includes_url())?>assets/styles/primeng.min.css" />
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>-->
+<script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+<!-- angular app header section end -->
 </head>
 
-<body>
+<body <?php body_class(); ?>>
 <div class="preloader">
     <div class="spinner">
         <div class="pre-bounce1"></div>
@@ -54,7 +63,12 @@
 			</div>
 		</div>
 	</header><!-- #masthead -->
+	<?php sydney_slider_template(); ?>
 
+	<div class="header-image">
+		<?php sydney_header_overlay(); ?>
+		<img class="header-inner" src="<?php header_image(); ?>" width="<?php echo esc_attr( get_custom_header()->width ); ?>" alt="<?php bloginfo('name'); ?>">
+	</div>
 
 	<div id="content" class="page-wrap">
 		<div class="container content-wrapper">
