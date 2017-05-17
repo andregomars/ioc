@@ -19,7 +19,21 @@
 	<?php endif; ?>
 <?php endif; ?>
 
-<?php wp_head(); ?>
+<?php 
+/**
+ * Dequeue unwanted styles
+ */
+function hams_dequeue_unnecessary_styles() {
+    wp_dequeue_style( 'sydney-bootstrap' );
+   // wp_deregister_style( 'sydney-bootstrap' );
+}
+add_action( 'wp_print_styles', 'hams_dequeue_unnecessary_styles' );
+
+
+	wp_head(); 
+
+
+?>
 <!-- angular app header section begin -->
 <base href="/ioc/index.php/hams">
 <link rel="stylesheet" type="text/css" href="<?php echo esc_url(includes_url())?>assets/styles/omega.theme.css" />
