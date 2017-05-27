@@ -36,12 +36,11 @@ add_action( 'wp_print_styles', 'hams_dequeue_unnecessary_styles' );
 ?>
 <!-- angular app header section begin -->
 <base href="/ioc/index.php/hams">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" type="text/css" href="<?php echo esc_url(includes_url())?>assets/styles/omega.theme.css" />
 <link rel="stylesheet" type="text/css" href="<?php echo esc_url(includes_url())?>assets/styles/primeng.min.css" />
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>-->
-<script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+
 <!-- angular app header section end -->
 </head>
 
