@@ -34,9 +34,17 @@ class FLPhotoModule extends FLBuilderModule {
 	 */
 	public function enqueue_scripts()
 	{
+		$override_lightbox = apply_filters( 'fl_builder_override_lightbox', false );
+		
 		if($this->settings && $this->settings->link_type == 'lightbox') {
-			$this->add_js('jquery-magnificpopup');
-			$this->add_css('jquery-magnificpopup');
+			if ( ! $override_lightbox ) {
+				$this->add_js('jquery-magnificpopup');
+				$this->add_css('jquery-magnificpopup');
+			}
+			else {
+				wp_dequeue_script('jquery-magnificpopup');
+				wp_dequeue_style('jquery-magnificpopup');
+			}
 		}
 	}
 
@@ -184,19 +192,21 @@ class FLPhotoModule extends FLBuilderModule {
 	public function get_classes()
 	{
 		$classes = array( 'fl-photo-img' );
-		
-		if ( ! empty( $this->settings->photo ) ) {
-			
+
+		if ( $this->settings->photo_source == 'library' && ! empty( $this->settings->photo ) ) {
+
 			$data = self::get_data();
-			
+
 			if ( is_object( $data ) ) {
-				
-				$classes[] = 'wp-image-' . $data->id;
+
+				if( isset( $data->id ) ) {
+					$classes[] = 'wp-image-' . $data->id;
+				}
 
 				if ( isset( $data->sizes ) ) {
 
 					foreach ( $data->sizes as $key => $size ) {
-						
+
 						if ( $size->url == $this->settings->photo_src ) {
 							$classes[] = 'size-' . $key;
 							break;

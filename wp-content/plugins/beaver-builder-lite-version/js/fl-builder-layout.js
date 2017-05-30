@@ -75,7 +75,114 @@
 				wmContent.trigger( 'refreshWookmark' );
 			}
 		},
-		
+
+		/**
+		 * Public method for refreshing Masonry within an element
+		 *
+		 * @since 1.8.1
+		 * @method refreshGridLayout
+		 */
+		refreshGridLayout: function( element )
+		{
+			var $element 		= 'undefined' == typeof element ? $( 'body' ) : $( element ),
+				msnryContent	= $element.find('.masonry');
+
+			if ( msnryContent.length )	{
+				msnryContent.masonry('layout');
+			}
+		},
+
+		/**
+		 * Public method for reloading BxSlider within an element
+		 *
+		 * @since 1.8.1
+		 * @method reloadSlider
+		 */
+		reloadSlider: function( element )
+		{
+			var $element 	= 'undefined' == typeof element ? $( 'body' ) : $( element ),
+				bxContent	= $element.find('.bx-viewport .fl-post-carousel-wrapper'),
+				bxObject   	= null;
+				
+			if ( bxContent.length ) {
+				bxContent.each(function(){
+					bxObject = $(this).data( 'bxSlider');
+					if ( bxObject ) {
+						bxObject.reloadSlider();
+					}					
+				})
+				
+			}
+		},
+
+		/**
+		 * Public method for resizing WP audio player
+		 *
+		 * @since 1.8.2
+		 * @method resizeAudio
+		 */
+		resizeAudio: function( element )
+		{
+			var $element 	 	= 'undefined' == typeof element ? $( 'body' ) : $( element ),
+				audioPlayers 	= $element.find('.wp-audio-shortcode.mejs-audio'),
+				player 		 	= null,
+				mejsPlayer 	 	= null,
+				rail 			= null,
+				railWidth 		= 400;
+				
+			if ( audioPlayers.length && typeof mejs !== 'undefined' ) {
+            	audioPlayers.each(function(){
+	            	player 		= $(this);
+	            	mejsPlayer 	= mejs.players[player.attr('id')];
+	            	rail 		= player.find('.mejs-controls .mejs-time-rail');
+	            	var innerMejs = player.find('.mejs-inner'),
+	            		total 	  = player.find('.mejs-controls .mejs-time-total');
+	            	
+	            	if ( typeof mejsPlayer !== 'undefined' ) {
+	            		railWidth = Math.ceil(player.width() * 0.8);
+
+	            		if ( innerMejs.length ) {
+
+		            		rail.css('width', railWidth +'px!important');
+		            		//total.width(rail.width() - 10);
+		            		
+		            		mejsPlayer.options.autosizeProgress = true;
+
+		            		// webkit has trouble doing this without a delay
+							setTimeout(function () {
+								mejsPlayer.setControlsSize();
+							}, 50);
+
+			            	player.find('.mejs-inner').css({
+			            		visibility: 'visible',
+			            		height: 'inherit'
+			            	});
+		            	} 
+		           	}
+	            });
+	        }
+		},
+
+		/**
+		 * Public method for preloading WP audio player when it's inside the hidden element
+		 *
+		 * @since 1.8.2
+		 * @method preloadAudio
+		 */
+		preloadAudio: function(element)
+		{
+			var $element 	 = 'undefined' == typeof element ? $( 'body' ) : $( element ),
+				contentWrap  = $element.closest('.fl-accordion-item'),
+				audioPlayers = $element.find('.wp-audio-shortcode.mejs-audio');
+			
+			if ( ! contentWrap.hasClass('fl-accordion-item-active') && audioPlayers.find('.mejs-inner').length ) {
+				audioPlayers.find('.mejs-inner').css({
+					visibility : 'hidden',
+					height: 0
+				});	
+			}			
+		},
+
 		/**
 		 * Unbinds builder layout events.
 		 *
@@ -130,15 +237,13 @@
 		 */ 
 		_initClasses: function()
 		{
-			var body = $( 'body' );
-			
-			// Don't add to archive pages.
-			if ( body.hasClass( 'archive' ) ) {
-				return;
-			}
+			var body = $( 'body' ),
+				ua   = navigator.userAgent;
 			
 			// Add the builder body class.
-			body.addClass('fl-builder');
+			if ( ! body.hasClass( 'archive' ) && $( '.fl-builder-content-primary' ).length > 0 ) {
+				body.addClass('fl-builder');
+			}
 			
 			// Add the builder touch body class.
 			if(FLBuilderLayout._isTouch()) {
@@ -148,6 +253,11 @@
 			// Add the builder mobile body class.
 			if(FLBuilderLayout._isMobile()) {
 				body.addClass('fl-builder-mobile');
+			}
+			
+			// IE11 body class.
+			if ( ua.indexOf( 'Trident/7.0' ) > -1 && ua.indexOf( 'rv:11.0' ) > -1 ) {
+				body.addClass( 'fl-builder-ie-11' );
 			}
 		},
 		
@@ -200,7 +310,7 @@
 		_initParallaxBackground: function()
 		{
 			var row     = $(this),
-				content = row.find('.fl-row-content-wrap'),
+				content = row.find('> .fl-row-content-wrap'),
 				src     = row.data('parallax-image'),
 				loaded  = row.data('parallax-loaded'),
 				img     = new Image();
@@ -277,6 +387,8 @@
 				width  		= wrap.data( 'width' ),
 				height  	= wrap.data( 'height' ),
 				mp4  		= wrap.data( 'mp4' ),
+				youtube 	= wrap.data( 'youtube'),	
+				vimeo 		= wrap.data( 'vimeo'),
 				mp4Type  	= wrap.data( 'mp4-type' ),
 				webm  		= wrap.data( 'webm' ),
 				webmType  	= wrap.data( 'webm-type' ),
@@ -285,8 +397,8 @@
 				fallbackTag = '',
 				videoTag	= null,
 				mp4Tag    	= null,
-				webmTag    	= null; 
-			
+				webmTag    	= null;	
+				
 			// Return if the video has been loaded for this row.
 			if ( loaded ) {
 				return;
@@ -324,7 +436,16 @@
 					videoTag.append( webmTag );
 				}
 				
-				wrap.append( videoTag );
+				// Check what video player we are going to load in a row
+				if ( 'undefined' != typeof youtube ) {
+					FLBuilderLayout._initYoutubeBgVideo.apply( this );	
+				} 
+				else if ( 'undefined' != typeof vimeo ) {
+					FLBuilderLayout._initVimeoBgVideo.apply( this );
+				}
+				else {
+					wrap.append( videoTag );
+				}
 			}
 			// Append the fallback tag for mobile.
 			else if ( '' !== fallback ) {
@@ -336,6 +457,114 @@
 			
 			// Mark this video as loaded.
 			wrap.data('loaded', true);
+		},
+
+		/**
+		 * Initializes Youtube video background
+		 *
+		 * @since 1.9
+		 * @access private
+		 * @method _initYoutubeBgVideo
+		 */
+		_initYoutubeBgVideo: function()
+		{
+			var playerWrap	= $(this),
+				videoId 	= playerWrap.data('video-id'),
+				videoPlayer = playerWrap.find('.fl-bg-video-player'),
+				enableAudio = playerWrap.data('enable-audio'),
+				player;
+
+			if ( videoId ) {
+
+				FLBuilderLayout._onYoutubeApiReady( function( YT ) {
+					setTimeout( function() {
+
+						player = new YT.Player( videoPlayer[0], {
+							videoId: videoId,
+							events: {
+								onReady: function(event) {
+									if ( "no" === enableAudio ) {
+										event.target.mute();
+									}
+									else if ("yes" === enableAudio && event.target.isMuted ) {
+										event.target.unMute();	
+									}
+									
+									// Store an instance to a parent
+									playerWrap.data('YTPlayer', player);
+									FLBuilderLayout._resizeYoutubeBgVideo.apply(playerWrap);
+
+									event.target.playVideo();									
+								},
+								onStateChange: function( event ) {
+									if ( event.data === YT.PlayerState.ENDED ) {
+										player.seekTo( 0 );
+									}
+								}
+							},
+							playerVars: {
+								controls: 0,
+								showinfo: 0
+							}
+						} );
+					}, 1 );
+				} );
+			}
+		},
+
+		/**
+		 * Check if Youtube API has been downloaded
+		 *
+		 * @since 1.9
+		 * @access private
+		 * @method _onYoutubeApiReady
+		 * @param  {Function} callback Method to call when YT API has been loaded
+		 */
+		_onYoutubeApiReady: function( callback ) {
+			if ( window.YT && YT.loaded ) {
+				callback( YT );
+			} else {
+				// If not ready check again by timeout..
+				setTimeout( function() {
+					FLBuilderLayout._onYoutubeApiReady( callback );
+				}, 350 );
+			}
+		},
+
+		/**
+		 * Initializes Vimeo video background
+		 *
+		 * @since 1.9
+		 * @access private
+		 * @method _initVimeoBgVideo
+		 */
+		_initVimeoBgVideo: function()
+		{
+			var playerWrap	= $(this),
+				videoId 	= playerWrap.data('video-id'),
+				videoPlayer = playerWrap.find('.fl-bg-video-player'),
+				enableAudio = playerWrap.data('enable-audio'),
+				player,
+				width = playerWrap.outerWidth();
+
+			if ( typeof Vimeo !== 'undefined' && videoId )	{
+				player = new Vimeo.Player(videoPlayer[0], {
+					id: videoId,
+			        loop: true,
+			        title: false,
+			        portrait: false
+				});
+
+				playerWrap.data('VMPlayer', player);
+				if ( "no" === enableAudio ) {
+					player.setVolume(0);
+				}
+				else if ("yes" === enableAudio ) {
+					player.setVolume(1);
+				}
+				
+				player.play();
+			}
 		},
 		
 		/**
@@ -394,7 +623,7 @@
 		 */ 
 		_resizeBgVideo: function()
 		{
-			if ( 0 === $( this ).find( 'video' ).length ) {
+			if ( 0 === $( this ).find( 'video' ).length && 0 === $( this ).find( 'iframe' ).length ) {
 				return;
 			}
 			
@@ -407,36 +636,115 @@
 				newWidth    = wrapWidth,
 				newHeight   = Math.round(vidHeight * wrapWidth/vidWidth),
 				newLeft     = 0,
-				newTop      = 0;
-				
-			if(vidHeight === '' || vidWidth === '') {
-				
-				vid.css({
-					'left'      : '0px',
-					'top'       : '0px',
-					'width'     : newWidth + 'px'
-				});
-			}
-			else {
-				
-				if(newHeight < wrapHeight) {
-					newHeight   = wrapHeight;
-					newWidth    = Math.round(vidWidth * wrapHeight/vidHeight);  
-					newLeft     = -((newWidth - wrapWidth)/2);
+				newTop      = 0,
+				iframe 		= wrap.find('iframe');
+			
+			if ( vid.length ) {
+				if(vidHeight === '' || typeof vidHeight === 'undefined' || vidWidth === '' || typeof vidWidth === 'undefined') {
+					vid.css({
+						'left'      : '0px',
+						'top'       : '0px',
+						'width'     : newWidth + 'px'
+					});
+
+					// Try to set the actual video dimension on 'loadedmetadata' when using URL as video source
+					vid.on('loadedmetadata', FLBuilderLayout._resizeOnLoadedMeta);
+
 				}
 				else {
-					newTop      = -((newHeight - wrapHeight)/2);
+					
+					if(newHeight < wrapHeight) {
+						newHeight   = wrapHeight;
+						newWidth    = Math.round(vidWidth * wrapHeight/vidHeight);  
+						newLeft     = -((newWidth - wrapWidth)/2);
+					}
+					else {
+						newTop      = -((newHeight - wrapHeight)/2);
+					}
+					
+					vid.css({
+						'left'      : newLeft + 'px',
+						'top'       : newTop + 'px',
+						'height'    : newHeight + 'px',
+						'width'     : newWidth + 'px'
+					});
 				}
-				
-				vid.css({
-					'left'      : newLeft + 'px',
-					'top'       : newTop + 'px',
-					'height'    : newHeight + 'px',
-					'width'     : newWidth + 'px'
-				});
+			}
+			else if ( iframe.length ) {
+
+				// Resize Youtube video player within iframe tag
+				if ( typeof wrap.data('youtube') !== 'undefined' ) {
+					FLBuilderLayout._resizeYoutubeBgVideo.apply(this);	
+				}				
 			}
 		},
-		
+
+		/**
+		 * Fires when video meta has been loaded. 
+		 * This will be Triggered when width/height attributes were not specified during video background resizing.
+		 *
+		 * @since 1.8.5
+		 * @access private
+		 * @method _resizeOnLoadedMeta
+		 */
+		_resizeOnLoadedMeta: function(){
+			var video 		= $(this),
+				wrapHeight 	= video.parent().outerHeight(),
+				wrapWidth 	= video.parent().outerWidth(),
+				vidWidth 	= video[0].videoWidth,
+				vidHeight 	= video[0].videoHeight,
+				newHeight   = Math.round(vidHeight * wrapWidth/vidWidth),
+				newTop 		= 0;
+
+			if(newHeight < wrapHeight) {
+				newHeight   = wrapHeight;
+				newWidth    = Math.round(vidWidth * wrapHeight/vidHeight);  
+				newLeft     = -((newWidth - wrapWidth)/2);
+			}
+			else {
+				newTop      = -((newHeight - wrapHeight)/2);
+			}
+
+			video.parent().data('width', vidWidth);
+			video.parent().data('height', vidHeight);
+
+			video.css({
+				'left'      : newLeft + 'px',
+				'top'       : newTop + 'px',
+				'width'     : newWidth + 'px',
+				'height' 	: newHeight + 'px'
+			});
+		},
+
+		/**
+		 * Fires when the window is resized to resize
+		 * a single Youtube video background.
+		 *
+		 * @since 1.9
+		 * @access private
+		 * @method _resizeYoutubeBgVideo
+		 */
+		_resizeYoutubeBgVideo: function()
+		{
+			var wrap				= $(this),
+				wrapWidth 			= wrap.outerWidth(),
+				wrapHeight 			= wrap.outerHeight(),
+				player 				= wrap.data('YTPlayer'),
+				video 				= player ? player.getIframe() : null,
+				aspectRatioSetting 	= '16:9', // Medium
+				aspectRatioArray 	= aspectRatioSetting.split( ':' ),
+				aspectRatio 		= aspectRatioArray[0] / aspectRatioArray[1],
+				ratioWidth 			= wrapWidth / aspectRatio,
+				ratioHeight 		= wrapHeight * aspectRatio,
+				isWidthFixed 		= wrapWidth / wrapHeight > aspectRatio,
+				width 				= isWidthFixed ? wrapWidth : ratioHeight,
+				height 				= isWidthFixed ? ratioWidth : wrapHeight;
+
+			if ( video ) {
+				$(video).width( width ).height( height );
+			}
+		},
+
 		/**
 		 * Initializes module animations.
 		 *
@@ -447,10 +755,22 @@
 		_initModuleAnimations: function()
 		{
 			if(typeof jQuery.fn.waypoint !== 'undefined' && !FLBuilderLayout._isMobile()) {
-				$('.fl-animation').waypoint({
-					offset: '80%',
-					handler: FLBuilderLayout._doModuleAnimation
-				});
+				$('.fl-animation').each( function() {
+					var node = $( this ),
+						nodeTop = node.offset().top,
+						winHeight = $( window ).height(),
+						bodyHeight = $( 'body' ).height(),
+						offset = '80%';
+						
+					if ( bodyHeight - nodeTop < winHeight * 0.2 ) {
+						offset = '100%';
+					}
+					
+					node.waypoint({
+						offset: offset,
+						handler: FLBuilderLayout._doModuleAnimation
+					});
+				} );
 			}
 		},
 		
@@ -463,7 +783,7 @@
 		 */ 
 		_doModuleAnimation: function()
 		{
-			var module = $(this),
+			var module = 'undefined' == typeof this.element ? $(this) : $(this.element),
 				delay  = parseFloat(module.data('animation-delay'));
 			
 			if(!isNaN(delay) && delay > 0) {
@@ -495,35 +815,39 @@
 			
 			if ( '' !== hash ) {
 				
-				element = $( '#' + hash );
-					
-				if ( element.length > 0 ) {
-					
-					if ( element.hasClass( 'fl-accordion-item' ) ) {
-						setTimeout( function() {
-							element.find( '.fl-accordion-button' ).trigger( 'click' );
-						}, 100 );
-					}
-					if ( element.hasClass( 'fl-tabs-panel' ) ) {
+				try {
+				
+					element = $( '#' + hash );
 						
-						setTimeout( function() {
-							
-							tabs 			= element.closest( '.fl-tabs' );
-							responsiveLabel = element.find( '.fl-tabs-panel-label' );
-							tabIndex 		= responsiveLabel.data( 'index' );
-							label 			= tabs.find( '.fl-tabs-labels .fl-tabs-label[data-index=' + tabIndex + ']' );
+					if ( element.length > 0 ) {
 						
-							if ( responsiveLabel.is( ':visible' ) ) {
-								responsiveLabel.trigger( 'click' );	
-							}
-							else {
-								FLBuilderLayout._scrollToElement( label );
-								label.trigger( 'click' );
-							}
+						if ( element.hasClass( 'fl-accordion-item' ) ) {
+							setTimeout( function() {
+								element.find( '.fl-accordion-button' ).trigger( 'click' );
+							}, 100 );
+						}
+						if ( element.hasClass( 'fl-tabs-panel' ) ) {
 							
-						}, 100 );
+							setTimeout( function() {
+								
+								tabs 			= element.closest( '.fl-tabs' );
+								responsiveLabel = element.find( '.fl-tabs-panel-label' );
+								tabIndex 		= responsiveLabel.data( 'index' );
+								label 			= tabs.find( '.fl-tabs-labels .fl-tabs-label[data-index=' + tabIndex + ']' );
+							
+								if ( responsiveLabel.is( ':visible' ) ) {
+									responsiveLabel.trigger( 'click' );	
+								}
+								else {									
+									label[0].click();
+									FLBuilderLayout._scrollToElement( element );
+								}
+								
+							}, 100 );
+						}
 					}
 				}
+				catch( e ) {}
 			}
 		},
 		
@@ -553,16 +877,21 @@
 				loc     = window.location,
 				id      = null,
 				element = null;
-			
+
 			if ( 'undefined' != typeof href && href.indexOf( '#' ) > -1 ) {
-				
+
 				if ( loc.pathname.replace( /^\//, '' ) == this.pathname.replace( /^\//, '' ) && loc.hostname == this.hostname ) {
-				
+
 					try {
-						
+
 						id      = href.split( '#' ).pop();
+						// If there is no ID then we have nowhere to look
+						// Fixes a quirk in jQuery and FireFox
+						if( ! id ) {
+							return;
+						}
 						element = $( '#' + id );
-						
+
 						if ( element.length > 0 ) {
 							if ( link.hasClass( 'fl-scroll-link' ) || element.hasClass( 'fl-row' ) || element.hasClass( 'fl-col' ) || element.hasClass( 'fl-module' ) ) {
 								$( link ).on( 'click', FLBuilderLayout._scrollToElementOnLinkClick );
@@ -629,11 +958,14 @@
 						callback();
 					}
 					
-					if ( history.pushState ) {
-						history.pushState( null, null, '#' + element.attr( 'id' ) );
-					}
-					else {
-						window.location.hash = element.attr( 'id' );
+					if ( undefined != element.attr( 'id' ) ) {
+						
+						if ( history.pushState ) {
+							history.pushState( null, null, '#' + element.attr( 'id' ) );
+						}
+						else {
+							window.location.hash = element.attr( 'id' );
+						}
 					}
 				} );
 			}
@@ -698,8 +1030,8 @@
 					FLBuilderLayout._scrollToElementOnLinkClick.call( this, e, callback );
 				}
 				else {
-					FLBuilderLayout._scrollToElement( label );
-					label.trigger( 'click' );
+					label[0].click();
+					FLBuilderLayout._scrollToElement( element );
 				}
 				
 				e.preventDefault();

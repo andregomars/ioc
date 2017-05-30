@@ -31,7 +31,7 @@ final class FLBuilderAJAXLayout {
 			FLBuilderModel::update_post_data( 'node_id', $node_id );
 		}
 		
-		// Render CSS and JS assets.
+		// Render the draft layout CSS that will be passed back.
 		FLBuilder::render_assets();
 
 		// Register scripts needed for shortcodes and widgets.
@@ -72,15 +72,21 @@ final class FLBuilderAJAXLayout {
 	 * @param string $cols The type of column layout to use.
 	 * @param int $position The position of the new row in the layout.
 	 * @param string $template_id The ID of a row template to render.
+	 * @param string $template_type The type of template. Either "user" or "core".
 	 * @return array
 	 */
-	static public function render_new_row( $cols = '1-col', $position = false, $template_id = null )
+	static public function render_new_row( $cols = '1-col', $position = false, $template_id = null, $template_type = 'user' )
 	{
 		// Add a row template?
-		if ( $template_id ) {
+		if ( null !== $template_id ) {
 			
-			// Add the row template.
-			$row = FLBuilderModel::apply_node_template( $template_id, null, $position );
+			if ( 'core' == $template_type ) {
+				$template = FLBuilderModel::get_template( $template_id, 'row' );
+				$row      = FLBuilderModel::apply_node_template( $template_id, null, $position, $template );
+			}
+			else {
+				$row = FLBuilderModel::apply_node_template( $template_id, null, $position );
+			}
 			
 			// Return the response.
 			return self::render( $row->node );
@@ -149,20 +155,22 @@ final class FLBuilderAJAXLayout {
 	}
 
 	/**
-	 * Renders the layout data for a new column.
+	 * Renders the layout data for a new column or columns.
 	 *
 	 * @since 1.7
 	 * @param string $node_id Node ID of the column to insert before or after.
 	 * @param string $insert Either before or after.
+	 * @param string $type The type of column(s) to insert.
+	 * @param boolean $nested Whether these columns are nested or not.
 	 * @return array
 	 */
-	static public function render_new_column( $node_id, $insert )
+	static public function render_new_columns( $node_id, $insert, $type, $nested )
 	{
-		// Add the column.
-		$col = FLBuilderModel::add_col( $node_id, $insert );
+		// Add the column(s).
+		$group = FLBuilderModel::add_cols( $node_id, $insert, $type, $nested );
 
 		// Return the response.	
-		return self::render( $col->parent );
+		return self::render( $group->node );
 	}
 
 	/**
@@ -173,13 +181,21 @@ final class FLBuilderAJAXLayout {
 	 * @param int $position The new module position.
 	 * @param string $type The type of module.
 	 * @param string $template_id The ID of a module template to render.
+	 * @param string $template_type The type of template. Either "user" or "core".
 	 * @return array
 	 */
-	static public function render_new_module( $parent_id, $position = false, $type = null, $template_id = null )
+	static public function render_new_module( $parent_id, $position = false, $type = null, $template_id = null, $template_type = 'user' )
 	{
 		// Add a module template?
-		if ( $template_id ) {
-			$module = FLBuilderModel::apply_node_template( $template_id, $parent_id, $position );
+		if ( null !== $template_id ) {
+			
+			if ( 'core' == $template_type ) {
+				$template = FLBuilderModel::get_template( $template_id, 'module' );
+				$module   = FLBuilderModel::apply_node_template( $template_id, $parent_id, $position, $template );
+			}
+			else {
+				$module = FLBuilderModel::apply_node_template( $template_id, $parent_id, $position );	
+			}
 		}
 		// Add a standard module.
 		else {
@@ -201,8 +217,11 @@ final class FLBuilderAJAXLayout {
 				$render_id 	= $row->node;
 			}
 			else if ( $parent->type == 'row' ) {
-				$col 		= FLBuilderModel::get_module_parent( 'column-group', $module );
-				$render_id 	= $col->node;
+				$group 		= FLBuilderModel::get_module_parent( 'column-group', $module );
+				$render_id 	= $group->node;
+			}
+			else if ( $parent->type == 'column-group' ) {
+				$render_id 	= $parent->node;
 			}
 			else {
 				$render_id = $module->node;
@@ -393,6 +412,7 @@ final class FLBuilderAJAXLayout {
 		
 		// Render shortcodes.
 		if ( apply_filters( 'fl_builder_render_shortcodes', true ) ) {
+			$html = apply_filters( 'fl_builder_before_render_shortcodes', $html );
 			ob_start();
 			echo do_shortcode( $html );
 			$html = ob_get_clean();
@@ -440,7 +460,14 @@ final class FLBuilderAJAXLayout {
 			}
 			
 			$assets['js'] .= 'FLBuilder._renderLayoutComplete();';
-			$assets['js'] = FLJSMin::minify( $assets['js'] );
+
+			try {
+			    $min = FLJSMin::minify( $assets['js'] );
+			} catch (Exception $e) {}
+
+			if ( $min ) {
+			    $assets['js'] = $min;
+			}
 		}
 		else {
 			$assets['js'] = $asset_info['js_url'] . '?ver=' . $asset_ver;
@@ -463,6 +490,11 @@ final class FLBuilderAJAXLayout {
 	 */
 	static private function register_scripts()
 	{
+		// Running these isn't necessary and can cause performance issues.
+		remove_action( 'wp_enqueue_scripts', 'FLBuilder::register_layout_styles_scripts' );
+		remove_action( 'wp_enqueue_scripts', 'FLBuilder::enqueue_ui_styles_scripts' );
+		remove_action( 'wp_enqueue_scripts', 'FLBuilder::enqueue_all_layouts_styles_scripts' );
+		
 		ob_start();
 		do_action( 'wp_enqueue_scripts' );
 		ob_end_clean();

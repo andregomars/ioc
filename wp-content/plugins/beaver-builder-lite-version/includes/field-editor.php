@@ -1,4 +1,14 @@
-<div class="fl-editor-field" id="<?php echo $name; ?>">
+<?php
+
+if ( ! isset( $field['wpautop'] ) || $field['wpautop'] ) {
+	$wpautop = ' data-wpautop="1"';
+}
+else {
+	$wpautop = ' data-wpautop="0"';
+}
+	
+?>
+<div class="fl-editor-field" id="<?php echo $name; ?>"<?php echo $wpautop; ?>>
 	<?php 
 
 	// Remove 3rd party editor buttons.
@@ -48,7 +58,7 @@
 			tinymce.init(editorProps);
 		}
 		if(typeof quicktags != 'undefined') {                
-			quicktags({id : editorId});
+			quicktags({id : editorId, buttons : 'strong,em,link,block,del,ins,img,ul,ol,li,code,close'});
 			QTags._buttonsInit();
 		}
 		
