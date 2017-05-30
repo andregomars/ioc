@@ -78,7 +78,7 @@ add_action( 'wp_print_styles', 'hams_dequeue_unnecessary_styles' );
 	</header><!-- #masthead -->
 	<?php sydney_slider_template(); ?>
 
-	<div class="header-image">
+	<div class="header-image" style="height: 80px">
 		<?php sydney_header_overlay(); ?>
 		<img class="header-inner" src="<?php header_image(); ?>" width="<?php echo esc_attr( get_custom_header()->width ); ?>" alt="<?php bloginfo('name'); ?>">
 	</div>
