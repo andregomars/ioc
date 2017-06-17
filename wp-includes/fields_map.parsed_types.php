@@ -1050,5 +1050,60 @@
       'type' => 'int',
     ),
   ),
+  'ioc_redirection_items' => 
+  array (
+    'action_code' => 
+    array (
+      'type' => 'int',
+    ),
+    'action_data' => 
+    array (
+      'type' => 'nvarchar',
+    ),
+    'action_type' => 
+    array (
+      'type' => 'nvarchar',
+    ),
+    'group_id' => 
+    array (
+      'type' => 'int',
+    ),
+    'id' => 
+    array (
+      'type' => 'primary_id',
+    ),
+    'last_access' => 
+    array (
+      'type' => 'date',
+    ),
+    'last_count' => 
+    array (
+      'type' => 'int',
+    ),
+    'match_type' => 
+    array (
+      'type' => 'nvarchar',
+    ),
+    'position' => 
+    array (
+      'type' => 'int',
+    ),
+    'regex' => 
+    array (
+      'type' => 'int',
+    ),
+    'status' => 
+    array (
+      'type' => 'nvarchar',
+    ),
+    'title' => 
+    array (
+      'type' => 'nvarchar',
+    ),
+    'url' => 
+    array (
+      'type' => 'nvarchar',
+    ),
+  ),
 )
  ?>
