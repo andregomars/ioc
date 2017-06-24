@@ -4,15 +4,8 @@
  *
  * @package Sydney
  */
-$url= $_SERVER['REQUEST_URI'];
-if (preg_match("/index.php\/hams/i", $url)) {
-	status_header("200");
-	get_template_part('page-templates/page_hams','page'); 
-}
-else {
-	status_header("404");
-	get_header(); 
-?>
+
+get_header(); ?>
 
 	<div id="primary" class="content-area fullwidth">
 		<main id="main" class="site-main" role="main">
@@ -33,7 +26,4 @@ else {
 		</main><!-- #main -->
 	</div><!-- #primary -->
 
-<?php
-	get_footer(); 
-}
-?>
+<?php get_footer(); ?>
