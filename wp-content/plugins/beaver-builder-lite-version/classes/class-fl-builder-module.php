@@ -143,21 +143,30 @@ class FLBuilderModule {
 	 * 
 	 * @since 1.0
 	 */
-	public function __construct($params)
+	public function __construct( $params )
 	{
 		$class_info             = new ReflectionClass($this);
 		$class_path             = $class_info->getFileName();
 		$dir_path               = dirname($class_path);
-		$this->name             = $params['name'];
-		$this->description      = $params['description'];
-		$this->category         = $params['category'];
 		$this->slug             = basename($class_path, '.php');
 		$this->enabled          = isset($params['enabled']) ? $params['enabled'] : true;
 		$this->editor_export    = isset($params['editor_export']) ? $params['editor_export'] : true;
 		$this->partial_refresh  = isset($params['partial_refresh']) ? $params['partial_refresh'] : false;
 		
+		$details = apply_filters( 'fl_builder_module_details', array(
+			'name'        => $params['name'],
+			'description' => $params['description'],
+			'category'    => $params['category']
+		), $this->slug );
+		
+		$this->name             = $details['name'];
+		$this->description      = $details['description'];
+		$this->category         = $details['category'];
+		
 		// We need to normalize the paths here since path comparisons 
 		// break on Windows because they use backslashes.
+		$abspath                    = str_replace( '\\', '/', ABSPATH );
+		$fl_builder_dir             = str_replace( '\\', '/', FL_BUILDER_DIR );
 		$dir_path                   = str_replace( '\\', '/', $dir_path );
 		$stylesheet_directory       = str_replace( '\\', '/', get_stylesheet_directory() );
 		$stylesheet_directory_uri   = str_replace( '\\', '/', get_stylesheet_directory_uri() );
@@ -177,8 +186,8 @@ class FLBuilderModule {
 			$this->url = trailingslashit($params['url']);
 			$this->dir = trailingslashit($params['dir']);
 		}
-		else if(!stristr($dir_path, FL_BUILDER_DIR)) {
-			$this->url = trailingslashit(str_replace(trailingslashit(ABSPATH), trailingslashit(home_url()), $dir_path));
+		else if(!stristr($dir_path, $fl_builder_dir)) {
+			$this->url = trailingslashit(str_replace(trailingslashit($abspath), trailingslashit(home_url()), $dir_path));
 			$this->dir = trailingslashit($dir_path);
 		}
 		else {                

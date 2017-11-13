@@ -30,6 +30,7 @@ final class FLBuilderShortcodes {
 	{
 		$builder_active = in_the_loop() && FLBuilderModel::is_builder_active();
 		$post_type 		= isset( $attrs['type'] ) ? $attrs['type'] : get_post_types();
+		$site_id        = isset( $attrs['site'] ) ? absint( $attrs['site'] ) : null;
 		$args  	   		= array(
 			'post_type' 	 => $post_type,
 			'posts_per_page' => -1
@@ -39,6 +40,7 @@ final class FLBuilderShortcodes {
 		if ( isset( $attrs['id'] ) ) {
 			
 			$args['orderby'] = 'post__in';
+			$args['ignore_sticky_posts'] = true;
 			
 			if ( is_numeric( $attrs['id'] ) ) {
 				$args['post__in'] = array( $attrs['id'] );
@@ -62,7 +64,7 @@ final class FLBuilderShortcodes {
 			echo '<div class="fl-builder-shortcode-mask-wrap"><div class="fl-builder-shortcode-mask"></div>';
 		}
 		
-		FLBuilder::render_query( $args );
+		FLBuilder::render_query( $args, $site_id );
 		
 		if ( $builder_active ) {
 			echo '</div>';
